@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import Home from "./screens/Home";
+import NewTask from "./screens/NewTask";
 
 const Tab = createBottomTabNavigator();
 
@@ -138,7 +139,7 @@ export default function App() {
 			<NavigationContainer>
 				<Tab.Navigator>
 					<Tab.Screen name="Home" component={Home} />
-					<Tab.Screen name="New Task" component={} />
+					<Tab.Screen name="New Task" component={NewTask} />
 					{/*<TextInput
 				value={currentTask}
 				placeholder="task"

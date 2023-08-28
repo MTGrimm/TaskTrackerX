@@ -12,6 +12,7 @@ const Home = ({ navigation }: { navigation: any }) => {
 			id: number;
 			name: string;
 			description: string;
+			trackerType: string;
 			days_time_goal: string;
 			days_counter_goal: string;
 			is_active: number;
@@ -21,13 +22,38 @@ const Home = ({ navigation }: { navigation: any }) => {
 	const [trackers, setTrackers] = useState<
 		Array<{
 			id: number;
-			trackerType: string;
 			dateDoneAt: string;
 			timeSpent: string;
 			counterDone: string;
 			taskId: number;
 		}>
 	>([]);
+
+	const handleTaskUpdate = (
+		newTask: {
+			id: number;
+			name: string;
+			description: string;
+			trackerType: string;
+			days_time_goal: string;
+			days_counter_goal: string;
+			is_active: number;
+		}[]
+	) => {
+		setTasks(newTask);
+	};
+
+	const handleTrackerUpdate = (
+		newTracker: {
+			id: number;
+			dateDoneAt: string;
+			timeSpent: string;
+			counterDone: string;
+			taskId: number;
+		}[]
+	) => {
+		setTrackers(newTracker);
+	};
 
 	const [currentTask, setCurrentTask] = useState<string | undefined>(
 		undefined
@@ -40,6 +66,7 @@ const Home = ({ navigation }: { navigation: any }) => {
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  name TEXT,
                  description TEXT,
+				 tracker_type TEXT NOT NULL,
                  days_time_goal TEXT NOT NULL,
                  days_counter_goal TEXT NOT NULL,
                  is_active INTEGER)`
@@ -48,14 +75,15 @@ const Home = ({ navigation }: { navigation: any }) => {
 			tx.executeSql(
 				`CREATE TABLE IF NOT EXISTS trackers (
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                 tracker_type TEXT NOT NULL,
                  date_done_at TEXT NOT NULL,
                  time_spent TEXT NOT NULL,
                  counter_done INTEGER NOT NULL,
                  task_id TEXT NOT NULL,
                  FOREIGN KEY (task_id) REFERENCES tasks(id))`
 			);
+		});
 
+		db.transaction((tx) => {
 			tx.executeSql(
 				"SELECT * FROM tasks",
 				null,
@@ -66,20 +94,28 @@ const Home = ({ navigation }: { navigation: any }) => {
 			tx.executeSql(
 				"SELECT * FROM trackers",
 				null,
-				(txObj, resultSet) => setTasks(resultSet.rows._array),
+				(txObj, resultSet) => setTrackers(resultSet.rows._array),
 				(txObj, error) => console.log(error)
 			);
 		});
-
-		db.transaction((tx) => {});
-
 		setIsLoading(false);
 	}, [db]);
+
+	if (isLoading) {
+		return (
+			<View style={styles.container}>
+				<Text>Loading Data...</Text>
+			</View>
+		);
+	}
 	return (
 		<View style={styles.container}>
 			<View style={styles.topBar}>
 				<Text>TaskTrackerX</Text>
-				<Button title="+" onPress={navigation.navigate("New Task")} />
+				<Button
+					title="+"
+					onPress={() => navigation.navigate("New Task")}
+				/>
 			</View>
 			<StatusBar style="auto" />
 		</View>
@@ -97,8 +133,8 @@ const styles = StyleSheet.create({
 	topBar: {
 		flex: 1,
 		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "space-between",
+		alignItems: "flex-start",
+		justifyContent: "center",
 	},
 });
 
