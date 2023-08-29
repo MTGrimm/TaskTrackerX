@@ -6,45 +6,121 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import Home from "./screens/Home";
 import NewTask from "./screens/NewTask";
+import { DatabaseContext, TasksContext, TasksProvider } from "./context";
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
-	// const db = SQLite.openDatabase("example.db");
-	// const [isLoading, setIsLoading] = useState(true);
-	// const [tasks, setTasks] = useState<Array<{ id: number; taskName: string }>>(
-	// 	[]
-	// );
-	// const [currentTask, setCurrentTask] = useState<string | undefined>(
-	// 	undefined
-	// );
+	const db = SQLite.openDatabase("Tasks.db");
 
-	// useEffect(() => {
-	// 	db.transaction((tx) => {
-	// 		tx.executeSql(
-	// 			"CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, taskName TEXT)"
-	// 		);
-	// 	});
+	const [isLoading, setIsLoading] = useState(true);
+	const [tasks, setTasks] = useState<
+		Array<{
+			id: number;
+			name: string;
+			description: string;
+			trackerType: string;
+			days_time_goal: string;
+			days_counter_goal: string;
+			is_active: number;
+		}>
+	>([]);
 
-	// 	db.transaction((tx) => {
-	// 		tx.executeSql(
-	// 			"SELECT * FROM tasks",
-	// 			null,
-	// 			(txObj, resultSet) => setTasks(resultSet.rows._array),
-	// 			(txObj, error) => console.log(error)
-	// 		);
-	// 	});
+	const [trackers, setTrackers] = useState<
+		Array<{
+			id: number;
+			dateDoneAt: string;
+			timeSpent: string;
+			counterDone: string;
+			taskId: number;
+		}>
+	>([]);
 
-	// 	setIsLoading(false);
-	// }, [db]);
+	const handleTaskUpdate = (
+		newTask: {
+			id: number;
+			name: string;
+			description: string;
+			trackerType: string;
+			days_time_goal: string;
+			days_counter_goal: string;
+			is_active: number;
+		}[]
+	) => {
+		setTasks(newTask);
+	};
 
-	// if (isLoading) {
-	// 	return (
-	// 		<View style={styles.container}>
-	// 			<Text>Loading Tasks...</Text>
-	// 		</View>
-	// 	);
-	// }
+	const handleTrackerUpdate = (
+		newTracker: {
+			id: number;
+			dateDoneAt: string;
+			timeSpent: string;
+			counterDone: string;
+			taskId: number;
+		}[]
+	) => {
+		setTrackers(newTracker);
+	};
+
+	const [currentTask, setCurrentTask] = useState<string | undefined>(
+		undefined
+	);
+
+	useEffect(() => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`CREATE TABLE IF NOT EXISTS tasks (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 name TEXT,
+                 description TEXT,
+				 tracker_type TEXT NOT NULL,
+                 days_time_goal TEXT NOT NULL,
+                 days_counter_goal TEXT NOT NULL,
+                 is_active INTEGER)`
+			);
+		});
+
+		db.transaction((tx) => {
+			tx.executeSql(
+				`CREATE TABLE IF NOT EXISTS trackers (
+                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                 date_done_at TEXT NOT NULL,
+                 time_spent TEXT NOT NULL,
+                 counter_done INTEGER NOT NULL,
+                 task_id TEXT NOT NULL,
+                 FOREIGN KEY (task_id) REFERENCES tasks(id))`
+			);
+		});
+	}, []);
+
+	useEffect(() => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				"SELECT * FROM tasks",
+				null,
+				(txObj, resultSet) => setTasks(resultSet.rows._array),
+				(txObj, error) => console.log(error)
+			);
+		});
+
+		db.transaction((tx) => {
+			tx.executeSql(
+				"SELECT * FROM trackers",
+				null,
+				(txObj, resultSet) => setTrackers(resultSet.rows._array),
+				(txObj, error) => console.log(error)
+			);
+		});
+		setIsLoading(false);
+	}, []);
+
+	if (isLoading) {
+		return (
+			<View style={styles.container}>
+				<Text>Loading Data...</Text>
+			</View>
+		);
+	}
 
 	// const addTask = () => {
 	// 	if (currentTask) {
@@ -135,12 +211,14 @@ export default function App() {
 	// };
 
 	return (
-		<View style={styles.container}>
-			<NavigationContainer>
-				<Tab.Navigator>
-					<Tab.Screen name="Home" component={Home} />
-					<Tab.Screen name="New Task" component={NewTask} />
-					{/*<TextInput
+		<DatabaseContext.Provider value={db}>
+			<TasksProvider>
+				<View style={styles.container}>
+					<NavigationContainer>
+						<Tab.Navigator>
+							<Tab.Screen name="Home" component={Home} />
+							<Tab.Screen name="New Task" component={NewTask} />
+							{/*<TextInput
 				value={currentTask}
 				placeholder="task"
 				onChangeText={setCurrentTask}
@@ -148,9 +226,11 @@ export default function App() {
   
 			<Button title="Add Task" onPress={addTask} />
   showTasks()*/}
-				</Tab.Navigator>
-			</NavigationContainer>
-		</View>
+						</Tab.Navigator>
+					</NavigationContainer>
+				</View>
+			</TasksProvider>
+		</DatabaseContext.Provider>
 	);
 }
 

@@ -1,9 +1,14 @@
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	Button,
+	TouchableOpacity,
+} from "react-native";
 import { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import * as SQLite from "expo-sqlite";
-
-interface Props {}
 
 const NewTask = ({ navigation }: { navigation: any }) => {
 	const [taskName, setTaskName] = useState("");
@@ -144,38 +149,35 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 			<View style={styles.entryRow}>
 				<Text style={{ flex: 1 }}>Tracker Type: </Text>
 				<View style={[{ flex: 1 }, { flexDirection: "row" }]}>
-					<Text
+					<TouchableOpacity
 						style={{
 							backgroundColor:
 								selectedTracker === 0 ? "skyblue" : "white",
 						}}
 						onPress={() => handleSelectedTracker(0)}
 					>
-						{" "}
-						Time{" "}
-					</Text>
+						<Text> Time </Text>
+					</TouchableOpacity>
 					<Text> | </Text>
-					<Text
+					<TouchableOpacity
 						style={{
 							backgroundColor:
 								selectedTracker === 1 ? "skyblue" : "white",
 						}}
 						onPress={() => handleSelectedTracker(1)}
 					>
-						{" "}
-						Count{" "}
-					</Text>
+						<Text> Count </Text>
+					</TouchableOpacity>
 					<Text> | </Text>
-					<Text
+					<TouchableOpacity
 						style={{
 							backgroundColor:
 								selectedTracker === 2 ? "skyblue" : "white",
 						}}
 						onPress={() => handleSelectedTracker(2)}
 					>
-						{" "}
-						Both{" "}
-					</Text>
+						<Text> Both </Text>
+					</TouchableOpacity>
 				</View>
 			</View>
 			<View style={styles.entryRow}>{displayTrackerGoal()}</View>
@@ -185,6 +187,8 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 		</View>
 	);
 };
+
+const newTask = async (taskType: number) => {};
 
 const styles = StyleSheet.create({
 	container: {
