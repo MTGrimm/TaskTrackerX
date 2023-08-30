@@ -1,9 +1,19 @@
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	Button,
+	TouchableOpacity,
+} from "react-native";
 import { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import * as SQLite from "expo-sqlite";
-
-interface Props {}
+import {
+	useDatabaseContext,
+	useTasksContext,
+	useTrackersContext,
+} from "../context";
 
 const NewTask = ({ navigation }: { navigation: any }) => {
 	const [taskName, setTaskName] = useState("");
@@ -14,9 +24,155 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 	const [timeGoalSecond, setTimeGoalSecond] = useState("");
 	const [countGoal, setCountGoal] = useState("");
 	const [loginError, setLoginError] = useState("");
+	const db = useDatabaseContext();
+	const { tasks, setTasks } = useTasksContext();
+	const { trackers, setTrackers } = useTrackersContext();
 
 	const handleSelectedTracker = (tracker: number) => {
 		setSelectedTracker(tracker);
+	};
+
+	const newTask = (
+		taskName: string,
+		taskDescription: string,
+		trackerType: number,
+		timeGoal: string,
+		counterGoal: string,
+		navigation: any,
+		db: SQLite.SQLiteDatabase,
+		tasks: Array<{
+			id: number;
+			name: string;
+			description: string;
+			tracker_type: string;
+			days_time_goal: string;
+			days_counter_goal: string;
+			is_active: number;
+		}>,
+		setTasks: React.Dispatch<
+			React.SetStateAction<Array<{
+				id: number;
+				name: string;
+				description: string;
+				tracker_type: string;
+				days_time_goal: string;
+				days_counter_goal: string;
+				is_active: number;
+			}> | null>
+		>,
+		trackers: any,
+		setTrackers: any
+	) => {
+		const currentDate = new Date();
+
+		const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+		const day = String(currentDate.getDate()).padStart(2, "0");
+		const year = currentDate.getFullYear();
+
+		const formattedDate = `${month}/${day}/${year}`;
+
+		console.log(trackerType);
+		if (trackerType === 1) {
+			console.log("checkpoint 1");
+			db.transaction((tx) => {
+				console.log("before transaction");
+				tx.executeSql(
+					`INSERT INTO tasks (
+						name,
+						description,
+						tracker_type,
+						days_time_goal,
+						days_counter_goal,
+						is_active
+					) VALUES (?, ?, ?, ?, ?, ?)`,
+					[
+						taskName,
+						taskDescription,
+						trackerType,
+						timeGoal,
+						counterGoal,
+						1,
+					],
+					(txaObj, resultSet) => {
+						console.log("checkpoint 2");
+						const taskID = resultSet.insertId;
+						if (tasks !== null) {
+							console.log("checkpoint 2");
+							let existingTasks = [...tasks];
+							if (taskID !== undefined) {
+								console.log("checkpoint1.1");
+								existingTasks.push({
+									id: taskID,
+									name: taskName,
+									description: taskDescription,
+									tracker_type: trackerType.toString(),
+									days_time_goal: timeGoal,
+									days_counter_goal: counterGoal,
+									is_active: 1,
+								});
+							}
+							console.log("checkpoint1.2");
+							try {
+								setTasks(existingTasks);
+							} catch (error) {
+								console.log(error);
+								console.log("ruh oh");
+							}
+							console.log("checkpoint1.3");
+						} else {
+							console.log("checkpoint 3");
+							setTasks(resultSet.rows._array);
+						}
+						console.log("checkpoint 2.5");
+						if (taskID !== undefined) {
+							console.log("checkpoint 4");
+							tx.executeSql(
+								`INSERT INTO trackers (
+									date_done_at,
+									time_spent,
+									counter_done,
+									task_id
+								) VALUES (?, ?, ?, ?)`,
+								[formattedDate, "0", 0, taskID],
+								(_txObj, trackerResultSet) => {
+									console.log("checkpoint 5");
+									const trackerID = trackerResultSet.insertId;
+									if (trackers !== null) {
+										let existingTrackers = [...trackers];
+										if (trackerID !== undefined) {
+											existingTrackers.push({
+												id: trackerID,
+												date_done_at: formattedDate,
+												time_spent: "0",
+												counter_done: 0,
+												task_id: taskID,
+											});
+										}
+										setTrackers(existingTrackers);
+									} else {
+										console.log("checkpoint 6");
+										setTrackers(
+											trackerResultSet.rows._array
+										);
+									}
+								},
+								(_txObj, error) => {
+									console.log("failed tracker");
+									console.log(error);
+									return true;
+								}
+							);
+						}
+					},
+					(_txObj, error) => {
+						console.log("failed task");
+						console.log(error);
+						return true;
+					}
+				);
+			});
+		}
+		navigation.navigate("Home");
 	};
 
 	const displayTime = () => {
@@ -93,11 +249,25 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 						0
 					) {
 						console.log("Success");
+						console.log("");
 						return;
 					}
 				} else if (selectedTracker === 1) {
 					if (Number(countGoal) !== 0) {
 						console.log("Success");
+						newTask(
+							taskName,
+							taskDescription,
+							selectedTracker,
+							"0",
+							countGoal,
+							navigation,
+							db,
+							tasks,
+							setTasks,
+							trackers,
+							setTrackers
+						);
 						return;
 					}
 				} else {
@@ -144,38 +314,35 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 			<View style={styles.entryRow}>
 				<Text style={{ flex: 1 }}>Tracker Type: </Text>
 				<View style={[{ flex: 1 }, { flexDirection: "row" }]}>
-					<Text
+					<TouchableOpacity
 						style={{
 							backgroundColor:
 								selectedTracker === 0 ? "skyblue" : "white",
 						}}
 						onPress={() => handleSelectedTracker(0)}
 					>
-						{" "}
-						Time{" "}
-					</Text>
+						<Text> Time </Text>
+					</TouchableOpacity>
 					<Text> | </Text>
-					<Text
+					<TouchableOpacity
 						style={{
 							backgroundColor:
 								selectedTracker === 1 ? "skyblue" : "white",
 						}}
 						onPress={() => handleSelectedTracker(1)}
 					>
-						{" "}
-						Count{" "}
-					</Text>
+						<Text> Count </Text>
+					</TouchableOpacity>
 					<Text> | </Text>
-					<Text
+					<TouchableOpacity
 						style={{
 							backgroundColor:
 								selectedTracker === 2 ? "skyblue" : "white",
 						}}
 						onPress={() => handleSelectedTracker(2)}
 					>
-						{" "}
-						Both{" "}
-					</Text>
+						<Text> Both </Text>
+					</TouchableOpacity>
 				</View>
 			</View>
 			<View style={styles.entryRow}>{displayTrackerGoal()}</View>
@@ -206,7 +373,6 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		marginTop: 20,
-		marginBottom: -10,
 	},
 });
 
