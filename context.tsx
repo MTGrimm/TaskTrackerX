@@ -12,25 +12,27 @@ export const useDatabaseContext = () => {
 		throw new Error("Ya done messed up buddy");
 	}
 
+	console.log("working here");
+
 	return db;
 };
 
 interface Tasks {
-	task: Array<{
+	tasks: Array<{
 		id: number;
 		name: string;
 		description: string;
-		trackerType: string;
+		tracker_type: string;
 		days_time_goal: string;
 		days_counter_goal: string;
 		is_active: number;
 	}> | null;
-	setTask: React.Dispatch<
+	setTasks: React.Dispatch<
 		React.SetStateAction<Array<{
 			id: number;
 			name: string;
 			description: string;
-			trackerType: string;
+			tracker_type: string;
 			days_time_goal: string;
 			days_counter_goal: string;
 			is_active: number;
@@ -41,17 +43,17 @@ interface Tasks {
 export const TasksContext = createContext<Tasks | undefined>(undefined);
 
 export const TasksProvider = ({ children }: { children: React.ReactNode }) => {
-	const [task, setTask] = useState<Array<{
+	const [tasks, setTasks] = useState<Array<{
 		id: number;
 		name: string;
 		description: string;
-		trackerType: string;
+		tracker_type: string;
 		days_time_goal: string;
 		days_counter_goal: string;
 		is_active: number;
-	}> | null>(null);
+	}> | null>([]);
 	return (
-		<TasksContext.Provider value={{ task, setTask }}>
+		<TasksContext.Provider value={{ tasks, setTasks }}>
 			{children}
 		</TasksContext.Provider>
 	);
@@ -68,20 +70,20 @@ export const useTasksContext = () => {
 };
 
 interface Trackers {
-	tracker: Array<{
+	trackers: Array<{
 		id: number;
-		dateDoneAt: string;
-		timeSpent: string;
-		counterDone: string;
-		taskId: number;
+		date_done_at: string;
+		time_spent: string;
+		counter_done: number;
+		task_id: number;
 	}> | null;
-	setTracker: React.Dispatch<
+	setTrackers: React.Dispatch<
 		React.SetStateAction<Array<{
 			id: number;
-			dateDoneAt: string;
-			timeSpent: string;
-			counterDone: string;
-			taskId: number;
+			date_done_at: string;
+			time_spent: string;
+			counter_done: number;
+			task_id: number;
 		}> | null>
 	>;
 }
@@ -93,15 +95,15 @@ export const TrackersProvider = ({
 }: {
 	children: React.ReactNode;
 }) => {
-	const [tracker, setTracker] = useState<Array<{
+	const [trackers, setTrackers] = useState<Array<{
 		id: number;
-		dateDoneAt: string;
-		timeSpent: string;
-		counterDone: string;
-		taskId: number;
-	}> | null>(null);
+		date_done_at: string;
+		time_spent: string;
+		counter_done: number;
+		task_id: number;
+	}> | null>([]);
 	return (
-		<TrackersContext.Provider value={{ tracker, setTracker }}>
+		<TrackersContext.Provider value={{ trackers, setTrackers }}>
 			{children}
 		</TrackersContext.Provider>
 	);
