@@ -9,26 +9,17 @@ import {
 } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { useState, useEffect } from "react";
+import {
+	useDatabaseContext,
+	useTasksContext,
+	useTrackersContext,
+} from "./context";
 
 const ContextWrapperV2 = () => {
-	const db = SQLite.openDatabase("example3.db");
+	const db = useDatabaseContext();
+	const { tasks, setTasks } = useTasksContext();
+	const { trackers, setTrackers } = useTrackersContext();
 	const [isLoading, setIsLoading] = useState(true);
-	const [tasks, setTasks] = useState<
-		Array<{
-			id: number;
-			name: string;
-			description: string;
-			count_goal: number;
-			is_active: number;
-		}>
-	>([]);
-	const [trackers, setTrackers] = useState<
-		Array<{
-			id: number;
-			count: number;
-			task_id: number;
-		}>
-	>([]);
 	const [currentTask, setCurrentTask] = useState("");
 	const [currentDescription, setCurrentDescription] = useState("");
 	const [currentCountGoal, setCurrentCountGoal] = useState("");
@@ -36,13 +27,13 @@ const ContextWrapperV2 = () => {
 	useEffect(() => {
 		db.transaction((tx) => {
 			tx.executeSql(
-				"CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, count_goal INTEGER, is_active INTEGER)"
+				"CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, tracker_type INTEGER, time_goal INTEGER, count_goal INTEGER, is_active INTEGER )"
 			);
 		});
 
 		db.transaction((tx) => {
 			tx.executeSql(
-				"CREATE TABLE IF NOT EXISTS trackers (id INTEGER PRIMARY KEY AUTOINCREMENT, count INTEGER, task_id INTEGER, FOREIGN KEY (task_id) REFERENCES tasks(id))"
+				"CREATE TABLE IF NOT EXISTS trackers (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT, time INTEGER, count INTEGER, task_id INTEGER, FOREIGN KEY (task_id) REFERENCES tasks(id))"
 			);
 		});
 
@@ -61,18 +52,6 @@ const ContextWrapperV2 = () => {
 				null,
 				(txObj, resultSet) => setTrackers(resultSet.rows._array),
 				(txObj, error) => console.log(error)
-			);
-		});
-
-		db.transaction((tx) => {
-			tx.executeSql(
-				"DELETE FROM tasks WHERE id = ?",
-				[3],
-				(txObj, resultSet) => console.log("success"),
-				(txObj, error) => {
-					console.log(error);
-					return true;
-				}
 			);
 		});
 

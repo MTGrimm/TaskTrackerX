@@ -6,12 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import Home from "./screens/Home";
 import NewTask from "./screens/NewTask";
-import {
-	DatabaseContext,
-	TasksContext,
-	TasksProvider,
-	TrackersProvider,
-} from "./context";
+import { DatabaseContext, TasksContext } from "./context";
 import ContextWrapper from "./ContextWrapper";
 import Test from "./Test";
 

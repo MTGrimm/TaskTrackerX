@@ -29,28 +29,35 @@ const Home = ({ navigation }: { navigation: any }) => {
 	const showTasks = () => {
 		return tasks?.map((task, index) => {
 			let trackerID = -1;
-			console.log(tasks);
-			console.log(trackers);
-			if (trackers !== null) {
-				trackerID = trackers.findIndex(
-					(tracker) => Math.floor(tracker.task_id) === task.id
-				);
-				console.log(task.id);
-				console.log(Math.floor(trackers[0].task_id));
-				console.log("uwu", tasks);
+			if (trackers !== null && trackers.length !== 0) {
+				console.log(tasks);
+				console.log(trackers);
+				if (trackers !== null) {
+					trackerID = trackers.findIndex(
+						(tracker) => Math.floor(tracker.task_id) === task.id
+					);
+					console.log(task.id);
+					console.log(Math.floor(trackers[0].task_id));
+					console.log("uwu", tasks);
 
-				console.log();
-			}
-			console.log(trackerID);
-			if (trackerID !== -1 && trackers !== null) {
-				return (
-					<View key={index} style={{ flex: 1 }}>
-						<Text>{task.name}</Text>
-						<Text>{trackers[trackerID].counter_done}</Text>
-					</View>
-				);
+					console.log();
+				}
+				console.log(trackerID);
+				if (trackerID !== -1 && trackers !== null) {
+					return (
+						<View key={index} style={{ flex: 1 }}>
+							<Text>{task.name}</Text>
+							<Text>{trackers[trackerID].counter_done}</Text>
+						</View>
+					);
+				}
 			}
 		});
+	};
+
+	const showInfo = () => {
+		console.log(tasks);
+		console.log(trackers);
 	};
 
 	return (
@@ -61,6 +68,7 @@ const Home = ({ navigation }: { navigation: any }) => {
 					title="+"
 					onPress={() => navigation.navigate("New Task", {})}
 				/>
+				<Button title="Show Details" onPress={showInfo} />
 			</View>
 			{showTasks()}
 			<StatusBar style="auto" />
