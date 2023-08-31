@@ -32,37 +32,7 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 		setSelectedTracker(tracker);
 	};
 
-	const newTask = (
-		taskName: string,
-		taskDescription: string,
-		trackerType: number,
-		timeGoal: string,
-		counterGoal: string,
-		navigation: any,
-		db: SQLite.SQLiteDatabase,
-		tasks: Array<{
-			id: number;
-			name: string;
-			description: string;
-			tracker_type: string;
-			days_time_goal: string;
-			days_counter_goal: string;
-			is_active: number;
-		}>,
-		setTasks: React.Dispatch<
-			React.SetStateAction<Array<{
-				id: number;
-				name: string;
-				description: string;
-				tracker_type: string;
-				days_time_goal: string;
-				days_counter_goal: string;
-				is_active: number;
-			}> | null>
-		>,
-		trackers: any,
-		setTrackers: any
-	) => {
+	const newTask = () => {
 		const currentDate = new Date();
 
 		const month = String(currentDate.getMonth() + 1).padStart(2, "0");
@@ -71,8 +41,8 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 
 		const formattedDate = `${month}/${day}/${year}`;
 
-		console.log(trackerType);
-		if (trackerType === 1) {
+		console.log(selectedTracker);
+		if (selectedTracker === 1) {
 			console.log("checkpoint 1");
 			db.transaction((tx) => {
 				console.log("before transaction");
@@ -88,9 +58,9 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 					[
 						taskName,
 						taskDescription,
-						trackerType,
-						timeGoal,
-						counterGoal,
+						selectedTracker.toString(),
+						0,
+						countGoal,
 						1,
 					],
 					(txaObj, resultSet) => {
@@ -105,9 +75,9 @@ const NewTask = ({ navigation }: { navigation: any }) => {
 									id: taskID,
 									name: taskName,
 									description: taskDescription,
-									tracker_type: trackerType.toString(),
-									days_time_goal: timeGoal,
-									days_counter_goal: counterGoal,
+									tracker_type: selectedTracker.toString(),
+									days_time_goal: "0",
+									days_counter_goal: countGoal,
 									is_active: 1,
 								});
 							}
