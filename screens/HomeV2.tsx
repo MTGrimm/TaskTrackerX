@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, TextInput, Button } from "react-native";
+import {
+	StyleSheet,
+	Text,
+	View,
+	TextInput,
+	Button,
+	SafeAreaView,
+} from "react-native";
 
 import { useState, useEffect } from "react";
 import * as SQLite from "expo-sqlite";
@@ -8,6 +15,7 @@ import {
 	useTasksContext,
 	useTrackersContext,
 } from "../context";
+import CustomButton from "./helpers/CustomButton";
 
 const HomeV2 = ({ navigation }: { navigation: any }) => {
 	console.log("oh no");
@@ -25,10 +33,8 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 		const year = date.getFullYear();
 
 		const formattedDate = `${month}/${day}/${year}`;
-		setCurrentDate(formattedDate);
+		return formattedDate;
 	};
-
-	getCurrentDate();
 
 	const updateTask = (taskID: number) => {};
 	const deleteTask = (taskID: number) => {};
@@ -38,6 +44,7 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const showTasks = () => {
 		// going through all the takss and displays all the relevent information
 		return tasks.map((task, index) => {
+			setCurrentDate(getCurrentDate());
 			let trackerID = -1;
 			// checking that tracker is not empty
 			if (trackers.length !== 0) {
@@ -70,16 +77,38 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 		});
 	};
 
-	return <View style={styles.container}>{showTasks()}</View>;
+	return (
+		<SafeAreaView style={styles.container}>
+			<View style={styles.topBar}>
+				<Text>Hey</Text>
+				<CustomButton
+					name="+"
+					onPress={() => console.log("Pressed Add")}
+				></CustomButton>
+			</View>
+			<Text>{showTasks()}</Text>
+			<StatusBar style="auto" />
+		</SafeAreaView>
+	);
 };
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: "#fff",
-		alignItems: "center",
+		flexDirection: "row",
+		alignItems: "flex-start",
 		justifyContent: "center",
 	},
+
+	topBar: {
+		flex: 1,
+		flexDirection: "row",
+		backgroundColor: "#B2C8C5",
+		justifyContent: "space-between",
+		paddingLeft: 20,
+		alignItems: "center",
+	},
+
 	row: {
 		flexDirection: "row",
 		alignItems: "center",
