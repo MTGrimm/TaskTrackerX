@@ -80,12 +80,18 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	return (
 		<SafeAreaView style={styles.container}>
 			<View style={styles.topBar}>
-				<Text>Hey</Text>
+				<Text style={{ fontSize: 30 }}>WELCOME</Text>
 				<CustomButton
 					name="+"
 					onPress={() => console.log("Pressed Add")}
 				></CustomButton>
 			</View>
+			<View style={styles.mainView}>
+				<View>
+					<Text style={{ fontSize: 25 }}>TASKS</Text>
+				</View>
+			</View>
+
 			<Text>{showTasks()}</Text>
 			<StatusBar style="auto" />
 		</SafeAreaView>
@@ -95,18 +101,32 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		flexDirection: "row",
-		alignItems: "flex-start",
+		flexDirection: "column",
+		alignItems: "center",
 		justifyContent: "center",
+		backgroundColor: "#E3EAE9",
 	},
 
 	topBar: {
-		flex: 1,
+		width: "100%",
 		flexDirection: "row",
-		backgroundColor: "#B2C8C5",
+		backgroundColor: "#BDDED9",
 		justifyContent: "space-between",
 		paddingLeft: 20,
 		alignItems: "center",
+		borderBottomWidth: 2,
+		borderRadius: 20,
+		borderBottomLeftRadius: 0,
+		borderBottomRightRadius: 0,
+	},
+
+	mainView: {
+		flex: 1,
+		width: "100%",
+		alignItems: "flex-start",
+		justifyContent: "flex-start",
+		paddingTop: 10,
+		paddingLeft: 10,
 	},
 
 	row: {
