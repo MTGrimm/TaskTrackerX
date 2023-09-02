@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	StyleSheet,
+	SafeAreaView,
+	Platform,
+	StatusBar,
+} from "react-native";
 import { DatabaseContext, TasksContext, TrackersContext } from "./context";
 import ContextWrapper from "./ContextWrapper";
 import ContextWrapperV2 from "./ContextWrapperV2";
@@ -7,6 +14,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import HomeV2 from "./screens/HomeV2";
+import NewTaskV2 from "./screens/NewTaskV2";
 
 const Stack = createStackNavigator();
 
@@ -39,13 +47,20 @@ export default function App() {
 		}>
 	>([]);
 
-	useEffect(() => {
-		console.log("initial useEffects");
+	// getting the date
+	const getCurrentDate = () => {
 		const date = new Date();
+
 		const month = String(date.getMonth() + 1).padStart(2, "0");
 		const day = String(date.getDate()).padStart(2, "0");
 		const year = date.getFullYear();
+
 		const formattedDate = `${month}/${day}/${year}`;
+		return formattedDate;
+	};
+
+	useEffect(() => {
+		console.log("initial useEffects");
 
 		// creating tables if they do not already exist
 		db.transaction((tx) => {
@@ -60,15 +75,14 @@ export default function App() {
 			);
 		});
 
-		console.log("checkpoint 1");
-
 		// getting all the tasks and trackers from the database
 		db.transaction((tx) => {
 			tx.executeSql(
 				"SELECT * FROM tasks",
-				[null],
+				undefined,
 				(txObj, resultSet) => setTasks(resultSet.rows._array),
 				(txObj, error) => {
+					console.log("owo?");
 					console.log(error);
 					return true;
 				}
@@ -78,9 +92,10 @@ export default function App() {
 		db.transaction((tx) => {
 			tx.executeSql(
 				"SELECT * FROM trackers",
-				[null],
+				undefined,
 				(txObj, resultSet) => setTrackers(resultSet.rows._array),
 				(txObj, error) => {
+					console.log("owo?");
 					console.log(error);
 					return true;
 				}
@@ -88,12 +103,13 @@ export default function App() {
 		});
 
 		if (trackers.length > 0) {
-			console.log(formattedDate);
+			setCurrentDate(getCurrentDate());
+			console.log(currentDate);
 			db.transaction((tx) => {
 				// getting all the trackers that have today's date
 				tx.executeSql(
 					"SELECT * FROM trackers WHERE date = ?",
-					["08/30/2023"],
+					[currentDate],
 					(txObj, resultSet) => {
 						// checking if there are any trackers with today's date, if there aRe, that means trackers have been updated already today, if there aren't add new trackers
 						if (resultSet.rows.length === 0) {
@@ -102,7 +118,7 @@ export default function App() {
 								if (tasks[i].is_active) {
 									tx.executeSql(
 										"INSERT INTO trackers (date, time, count, task_id) VALUES (?, ?, ?, ?)",
-										["08/30/2023", 0, 0, tasks[i].id],
+										[currentDate, 0, 0, tasks[i].id],
 										(txObj, resultSet) => {
 											// adding the tracker to the tracker useState
 											if (
@@ -110,7 +126,7 @@ export default function App() {
 											) {
 												trackers.push({
 													id: resultSet.insertId,
-													date: "08/30/2023",
+													date: currentDate,
 													time: 0,
 													count: 0,
 													task_id: tasks[i].id,
@@ -122,6 +138,7 @@ export default function App() {
 											}
 										},
 										(txObj, error) => {
+											console.log("owo?");
 											console.log(error);
 											return true;
 										}
@@ -131,6 +148,7 @@ export default function App() {
 						}
 					},
 					(txObj, error) => {
+						console.log("owo?");
 						console.log(error);
 						return true;
 					}
@@ -153,12 +171,22 @@ export default function App() {
 		<TasksContext.Provider value={{ tasks, setTasks }}>
 			<TrackersContext.Provider value={{ trackers, setTrackers }}>
 				<DatabaseContext.Provider value={db}>
-					<NavigationContainer>
-						<Stack.Navigator>
-							<Stack.Screen name={"Home"} component={HomeV2} />
-						</Stack.Navigator>
-					</NavigationContainer>
-					<ContextWrapperV2></ContextWrapperV2>
+					<SafeAreaView style={styles.safeArea}>
+						<NavigationContainer>
+							<Stack.Navigator
+								screenOptions={{ headerShown: false }}
+							>
+								<Stack.Screen
+									name={"Home"}
+									component={HomeV2}
+								/>
+								<Stack.Screen
+									name={"New Task"}
+									component={NewTaskV2}
+								/>
+							</Stack.Navigator>
+						</NavigationContainer>
+					</SafeAreaView>
 				</DatabaseContext.Provider>
 			</TrackersContext.Provider>
 		</TasksContext.Provider>
@@ -166,6 +194,12 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+	safeArea: {
+		flex: 1,
+		paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+		backgroundColor: "#E3EAE9",
+	},
+
 	container: {
 		flex: 1,
 		backgroundColor: "#fff",
