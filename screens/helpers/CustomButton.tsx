@@ -7,6 +7,7 @@ import {
 	SafeAreaView,
 	TouchableWithoutFeedback,
 } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Props {
 	name: string;
@@ -15,33 +16,33 @@ interface Props {
 
 const CustomButton = ({ name, onPress }: Props) => {
 	return (
-		<TouchableWithoutFeedback
+		<TouchableOpacity
 			style={styles.buttonContainer}
+			activeOpacity={1}
 			onPress={onPress}
 		>
 			<Text style={styles.textStyle}>{name}</Text>
-		</TouchableWithoutFeedback>
+		</TouchableOpacity>
 	);
 };
 
 const styles = StyleSheet.create({
 	buttonContainer: {
-		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		alignSelf: "flex-end",
+		alignSelf: "center",
 	},
 
 	textStyle: {
-		backgroundColor: "#E3EAE9",
-		fontSize: 30,
+		backgroundColor: "#86D2C6",
+		fontSize: 40,
 		marginTop: 10,
 		marginBottom: 10,
 		marginRight: 10,
-		paddingLeft: 15,
-		paddingRight: 15,
-		paddingTop: 5,
-		paddingBottom: 5,
+		paddingLeft: 10,
+		paddingRight: 10,
+		paddingTop: 0,
+		paddingBottom: 0,
 	},
 });
 

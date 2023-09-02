@@ -6,7 +6,7 @@ import {
 	Button,
 	SafeAreaView,
 } from "react-native";
-
+import { SelectList } from "react-native-dropdown-select-list";
 import { useState, useEffect } from "react";
 import * as SQLite from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
@@ -23,6 +23,12 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const { tasks, setTasks } = useTasksContext();
 	const { trackers, setTrackers } = useTrackersContext();
 	const [currentDate, setCurrentDate] = useState("");
+	const [taskType, setTaskType] = useState("Active");
+	const taskTypes = [
+		{ key: 0, value: "Active" },
+		{ key: 1, value: "Inactive" },
+		{ key: 2, value: "All" },
+	];
 
 	// getting the date
 	const getCurrentDate = () => {
@@ -44,54 +50,85 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const showTasks = () => {
 		// going through all the takss and displays all the relevent information
 		return tasks.map((task, index) => {
-			setCurrentDate(getCurrentDate());
-			let trackerID = -1;
-			// checking that tracker is not empty
-			if (trackers.length !== 0) {
-				trackerID = trackers.findIndex((tracker) => {
-					console.log("uwu");
-					return (
-						tracker.task_id === task.id &&
-						tracker.date === currentDate
-					);
-				});
+			if (
+				(task.is_active === 1 &&
+					(taskTypes[Number(taskType)].key === 0 ||
+						taskTypes[Number(taskType)].key === 2)) ||
+				(task.is_active === 0 &&
+					(taskTypes[Number(taskType)].key === 1 ||
+						taskTypes[Number(taskType)].key === 2))
+			) {
+				setCurrentDate(getCurrentDate());
+				let trackerID = -1;
+				// checking that tracker is not empty
+				if (trackers.length !== 0) {
+					trackerID = trackers.findIndex((tracker) => {
+						console.log("uwu");
+						return (
+							tracker.task_id === task.id &&
+							tracker.date === currentDate
+						);
+					});
 
-				// checking that there is a corresponding tracker for each task
-				if (trackerID !== -1) {
-					return (
-						<View key={index} style={styles.row}>
-							<Text>{task.name}</Text>
-							<Text>{trackers[trackerID].count}</Text>
-							<Button
-								title="+"
-								onPress={() => addCount(trackerID)}
-							/>
-							<Button
-								title="+"
-								onPress={() => removeCount(trackerID)}
-							/>
-						</View>
-					);
+					// checking that there is a corresponding tracker for each task
+					if (trackerID !== -1) {
+						return (
+							<View key={index} style={styles.row}>
+								<Text>{task.name}</Text>
+								<Text>{trackers[trackerID].count}</Text>
+								<Button
+									title="+"
+									onPress={() => addCount(trackerID)}
+								/>
+								<Button
+									title="+"
+									onPress={() => removeCount(trackerID)}
+								/>
+							</View>
+						);
+					}
 				}
 			}
 		});
 	};
 
+	const emptyRender = () => {
+		if (taskTypes !== undefined) {
+			if (taskTypes[Number(taskType)] !== undefined) {
+				if (Number(taskType) === 2) {
+					return <Text>No Tasks!</Text>;
+				}
+				return (
+					<Text>
+						No Tasks in {taskTypes[Number(taskType)].value}!
+					</Text>
+				);
+			}
+		}
+		return null;
+	};
+
 	return (
 		<SafeAreaView style={styles.container}>
 			<View style={styles.topBar}>
-				<Text style={{ fontSize: 30 }}>WELCOME</Text>
+				<Text style={{ fontSize: 30 }}></Text>
 				<CustomButton
 					name="+"
-					onPress={() => console.log("Pressed Add")}
+					onPress={() => navigation.navigate("New Task")}
 				></CustomButton>
 			</View>
 			<View style={styles.mainView}>
-				<View>
+				<View style={styles.taskTopBar}>
 					<Text style={{ fontSize: 25 }}>TASKS</Text>
+					<SelectList
+						setSelected={setTaskType}
+						data={taskTypes}
+						search={false}
+						defaultOption={{ key: 1, value: "Active" }}
+					/>
 				</View>
+				{emptyRender()}
 			</View>
-
 			<Text>{showTasks()}</Text>
 			<StatusBar style="auto" />
 		</SafeAreaView>
@@ -105,6 +142,13 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: "#E3EAE9",
+	},
+
+	taskTopBar: {
+		width: "100%",
+		flexDirection: "row",
+		justifyContent: "space-between",
+		flex: 1,
 	},
 
 	topBar: {

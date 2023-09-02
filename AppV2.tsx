@@ -14,6 +14,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import HomeV2 from "./screens/HomeV2";
+import NewTaskV2 from "./screens/NewTaskV2";
 
 const Stack = createStackNavigator();
 
@@ -179,6 +180,10 @@ export default function App() {
 									name={"Home"}
 									component={HomeV2}
 								/>
+								<Stack.Screen
+									name={"New Task"}
+									component={NewTaskV2}
+								/>
 							</Stack.Navigator>
 						</NavigationContainer>
 					</SafeAreaView>
@@ -192,6 +197,7 @@ const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
 		paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+		backgroundColor: "#E3EAE9",
 	},
 
 	container: {
