@@ -15,6 +15,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import * as SQLite from "expo-sqlite";
 import HomeV2 from "./screens/HomeV2";
 import NewTaskV2 from "./screens/NewTaskV2";
+import Task from "./screens/Task";
 
 const Stack = createStackNavigator();
 
@@ -22,7 +23,6 @@ export default function App() {
 	// initiallizing database
 	const db = SQLite.openDatabase("example4.db");
 	const [isLoading, setIsLoading] = useState(true);
-	const [currentDate, setCurrentDate] = useState("");
 	console.log("init");
 
 	const [tasks, setTasks] = useState<
@@ -102,8 +102,9 @@ export default function App() {
 			);
 		});
 
+		console.log("huh?", trackers.length);
 		if (trackers.length > 0) {
-			setCurrentDate(getCurrentDate());
+			const currentDate = getCurrentDate();
 			console.log(currentDate);
 			db.transaction((tx) => {
 				// getting all the trackers that have today's date
@@ -111,11 +112,14 @@ export default function App() {
 					"SELECT * FROM trackers WHERE date = ?",
 					[currentDate],
 					(txObj, resultSet) => {
+						console.log("How many? " + resultSet.rowsAffected);
 						// checking if there are any trackers with today's date, if there aRe, that means trackers have been updated already today, if there aren't add new trackers
 						if (resultSet.rows.length === 0) {
 							// going through all the tasks and if they are active, adding a new tracker for the day
 							for (let i = 0; i < tasks.length; i++) {
+								console.log("owo?");
 								if (tasks[i].is_active) {
+									console.log("owi?");
 									tx.executeSql(
 										"INSERT INTO trackers (date, time, count, task_id) VALUES (?, ?, ?, ?)",
 										[currentDate, 0, 0, tasks[i].id],
@@ -184,6 +188,7 @@ export default function App() {
 									name={"New Task"}
 									component={NewTaskV2}
 								/>
+								<Stack.Screen name={"Task"} component={Task} />
 							</Stack.Navigator>
 						</NavigationContainer>
 					</SafeAreaView>
