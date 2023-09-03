@@ -22,8 +22,8 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const db = useDatabaseContext();
 	const { tasks, setTasks } = useTasksContext();
 	const { trackers, setTrackers } = useTrackersContext();
-	const [currentDate, setCurrentDate] = useState("");
-	const [taskType, setTaskType] = useState("Active");
+	// const [currentDate, setCurrentDate] = useState("");
+	const [taskType, setTaskType] = useState(0);
 	const taskTypes = [
 		{ key: 0, value: "Active" },
 		{ key: 1, value: "Inactive" },
@@ -42,14 +42,120 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 		return formattedDate;
 	};
 
-	const updateTask = (taskID: number) => {};
-	const deleteTask = (taskID: number) => {};
-	const addCount = (trackerID: number) => {};
-	const removeCount = (trackerID: number) => {};
+	const updateTask = (task: any, taskID: number) => {};
+	const deleteTask = (task: any, taskID: number) => {};
+	const addTrackerValue = (
+		task: any,
+		trackerID: number,
+		tracker_type: number
+	) => {
+		if (tracker_type === 1) {
+			db.transaction((tx) => {
+				tx.executeSql(
+					"UPDATE trackers SET count = ? WHERE id = ?",
+					[trackers[trackerID].count + 1, trackers[trackerID].id],
+					(txObj, resultSet) => {
+						let existingTrackers = [...trackers];
+						existingTrackers[trackerID].count += 1;
+						setTrackers(existingTrackers);
+					},
+					(txObj, error) => {
+						console.log(error);
+						return true;
+					}
+				);
+			});
+		}
+
+		if (tracker_type === 2) {
+			db.transaction((tx) => {
+				tx.executeSql(
+					"UPDATE trackers SET time = ? WHERE id = ?",
+					[trackers[trackerID].time + 1, trackers[trackerID].id],
+					(txObj, resultSet) => {
+						let existingTrackers = [...trackers];
+						existingTrackers[trackerID].time += 1;
+						setTrackers(existingTrackers);
+					},
+					(txObj, error) => {
+						console.log(error);
+						return true;
+					}
+				);
+			});
+		}
+	};
+	const removeTracerValue = (
+		task: any,
+		trackerID: number,
+		tracker_type: number
+	) => {
+		if (task.tracker_type === 1) {
+			db.transaction((tx) => {
+				tx.executeSql(
+					"UPDATE trackers SET count = ? WHERE id = ?",
+					[trackers[trackerID].count - 1, trackers[trackerID].id],
+					(txObj, resultSet) => {
+						let existingTrackers = [...trackers];
+						existingTrackers[trackerID].count -= 1;
+						setTrackers(existingTrackers);
+					},
+					(txObj, error) => {
+						console.log(error);
+						return true;
+					}
+				);
+			});
+		}
+
+		if (task.tracker_type === 2) {
+			db.transaction((tx) => {
+				tx.executeSql(
+					"UPDATE trackers SET time = ? WHERE id = ?",
+					[trackers[trackerID].time - 1, trackers[trackerID].id],
+					(txObj, resultSet) => {
+						let existingTrackers = [...trackers];
+						existingTrackers[trackerID].time -= 1;
+						setTrackers(existingTrackers);
+					},
+					(txObj, error) => {
+						console.log(error);
+						return true;
+					}
+				);
+			});
+		}
+	};
+
+	const valueButton = (
+		task: any,
+		trackerID: number,
+		tracker_type: number
+	) => {
+		return (
+			<View>
+				<Button
+					title="+"
+					onPress={() =>
+						addTrackerValue(task, trackerID, tracker_type)
+					}
+				/>
+				<Button
+					title="-"
+					onPress={() =>
+						removeTracerValue(task, trackerID, tracker_type)
+					}
+				/>
+			</View>
+		);
+	};
 
 	const showTasks = () => {
 		// going through all the takss and displays all the relevent information
-		return tasks.map((task, index) => {
+		const currentDate = getCurrentDate();
+
+		return tasks.map((task) => {
+			console.log("uwu");
 			if (
 				(task.is_active === 1 &&
 					(taskTypes[Number(taskType)].key === 0 ||
@@ -58,12 +164,11 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 					(taskTypes[Number(taskType)].key === 1 ||
 						taskTypes[Number(taskType)].key === 2))
 			) {
-				setCurrentDate(getCurrentDate());
 				let trackerID = -1;
 				// checking that tracker is not empty
 				if (trackers.length !== 0) {
 					trackerID = trackers.findIndex((tracker) => {
-						console.log("uwu");
+						console.log("finding tracker id");
 						return (
 							tracker.task_id === task.id &&
 							tracker.date === currentDate
@@ -72,18 +177,33 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 
 					// checking that there is a corresponding tracker for each task
 					if (trackerID !== -1) {
+						const hours = Math.floor(trackers[trackerID].time / 60);
+						const minutes = trackers[trackerID].time - hours * 60;
+						console.log(task.id);
 						return (
-							<View key={index} style={styles.row}>
-								<Text>{task.name}</Text>
-								<Text>{trackers[trackerID].count}</Text>
-								<Button
-									title="+"
-									onPress={() => addCount(trackerID)}
-								/>
-								<Button
-									title="+"
-									onPress={() => removeCount(trackerID)}
-								/>
+							<View key={task.id} style={styles.row}>
+								<Text onPress={() => console.log(task.id)}>
+									{task.name}
+								</Text>
+								{task.tracker_type === 1 ||
+								task.tracker_type === 3 ? (
+									<Text>{trackers[trackerID].count}</Text>
+								) : null}
+								{task.tracker_type === 2 ||
+								task.tracker_type === 3
+									? [
+											<Text>Hours: {hours}</Text>,
+											<Text>Minutes: {minutes}</Text>,
+									  ]
+									: null}
+								{task.tracker_type === 3
+									? [
+											valueButton(task, trackerID, 1),
+											valueButton(task, trackerID, 2),
+									  ]
+									: task.tracker_type === 1
+									? valueButton(task, trackerID, 1)
+									: valueButton(task, trackerID, 2)}
 							</View>
 						);
 					}
@@ -94,15 +214,12 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 
 	const emptyRender = () => {
 		if (taskTypes !== undefined) {
+			console.log(taskType);
 			if (taskTypes[Number(taskType)] !== undefined) {
-				if (Number(taskType) === 2) {
+				if (Number(taskType) === 3) {
 					return <Text>No Tasks!</Text>;
 				}
-				return (
-					<Text>
-						No Tasks in {taskTypes[Number(taskType)].value}!
-					</Text>
-				);
+				return <Text>No Tasks in {taskTypes[taskType].value}!</Text>;
 			}
 		}
 		return null;
@@ -124,12 +241,19 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 						setSelected={setTaskType}
 						data={taskTypes}
 						search={false}
-						defaultOption={{ key: 1, value: "Active" }}
+						defaultOption={{ key: 0, value: "Active" }}
 					/>
 				</View>
 				{emptyRender()}
+				<View style={styles.mainView}>{showTasks()}</View>
+				<Button
+					title="show info"
+					onPress={() => {
+						console.log(tasks);
+						console.log(trackers);
+					}}
+				/>
 			</View>
-			<Text>{showTasks()}</Text>
 			<StatusBar style="auto" />
 		</SafeAreaView>
 	);

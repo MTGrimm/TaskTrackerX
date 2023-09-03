@@ -18,7 +18,20 @@ import {
 import CustomButton from "./helpers/CustomButton";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-const NewTaskV2 = ({ navigation }: { navigation: any }) => {
+interface Props {
+	navigation: any;
+	task: {
+		id: number;
+		name: string;
+		description: string;
+		tracker_type: number;
+		time_goal: number;
+		counter_goal: number;
+		is_active: number;
+	};
+}
+
+const Task = ({ navigation, task }: Props) => {
 	const [taskName, setTaskName] = useState("");
 	const [taskDescription, setTaskDescription] = useState("");
 	const [selectedTracker, setSelectedTracker] = useState(1);
@@ -467,4 +480,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default NewTaskV2;
+export default Task;
