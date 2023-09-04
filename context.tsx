@@ -17,6 +17,8 @@ export const useDatabaseContext = () => {
 	return db;
 };
 
+export const BackgroundColor = createContext<string>("#141414");
+
 interface Tasks {
 	tasks: Array<{
 		id: number;

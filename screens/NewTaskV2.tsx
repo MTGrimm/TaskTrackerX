@@ -280,7 +280,7 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 								: null,
 						]}
 					>
-						Create New Task
+						New Task
 					</Text>
 					{error !== null ? (
 						<Text
@@ -375,7 +375,7 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
-		backgroundColor: "#E3EAE9",
+		backgroundColor: "#141414",
 	},
 
 	trackerType: {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-around",
 		alignItems: "center",
-		backgroundColor: "#BDDED9",
+		backgroundColor: "#141414",
 	},
 
 	trackerTouch: {
@@ -402,12 +402,13 @@ const styles = StyleSheet.create({
 
 	inputBox: {
 		flex: 1,
-		backgroundColor: "#BDDED9",
+		backgroundColor: "#141414",
 		width: "100%",
 	},
 
 	inputText: {
 		fontSize: 20,
+		color: "white",
 	},
 
 	inputRow: {
@@ -425,13 +426,13 @@ const styles = StyleSheet.create({
 	},
 
 	topBar: {
-		width: "100%",
+		width: "90%",
 		flexDirection: "row",
-		backgroundColor: "#BDDED9",
 		justifyContent: "space-between",
 		paddingLeft: 20,
 		alignItems: "center",
-		borderBottomWidth: 2,
+		borderColor: "#3F3F3F",
+		borderBottomWidth: 0.5,
 		borderRadius: 20,
 		borderBottomLeftRadius: 0,
 		borderBottomRightRadius: 0,
@@ -456,6 +457,7 @@ const styles = StyleSheet.create({
 	},
 
 	textStyle: {
+		color: "white",
 		fontSize: 33,
 		marginTop: 10,
 		marginBottom: 15,

@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
 	},
 
 	textStyle: {
-		backgroundColor: "#86D2C6",
+		backgroundColor: "#141414",
 		fontSize: 40,
 		marginTop: 10,
 		marginBottom: 10,

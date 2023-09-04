@@ -5,12 +5,14 @@ import {
 	TextInput,
 	Button,
 	SafeAreaView,
+	ColorValue,
 } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import * as SQLite from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import {
+	BackgroundColor,
 	useDatabaseContext,
 	useTasksContext,
 	useTrackersContext,
@@ -23,12 +25,16 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const { tasks, setTasks } = useTasksContext();
 	const { trackers, setTrackers } = useTrackersContext();
 	// const [currentDate, setCurrentDate] = useState("");
+	const backgroundColor = useContext(BackgroundColor);
+
 	const [taskType, setTaskType] = useState(0);
 	const taskTypes = [
 		{ key: 0, value: "Active" },
 		{ key: 1, value: "Inactive" },
 		{ key: 2, value: "All" },
 	];
+
+	const styles = getStyles(backgroundColor);
 
 	// getting the date
 	const getCurrentDate = () => {
@@ -90,7 +96,7 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 		trackerID: number,
 		tracker_type: number
 	) => {
-		if (task.tracker_type === 1) {
+		if (tracker_type === 1) {
 			db.transaction((tx) => {
 				tx.executeSql(
 					"UPDATE trackers SET count = ? WHERE id = ?",
@@ -108,7 +114,7 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 			});
 		}
 
-		if (task.tracker_type === 2) {
+		if (tracker_type === 2) {
 			db.transaction((tx) => {
 				tx.executeSql(
 					"UPDATE trackers SET time = ? WHERE id = ?",
@@ -139,12 +145,14 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 					onPress={() =>
 						addTrackerValue(task, trackerID, tracker_type)
 					}
+					color="#313638"
 				/>
 				<Button
 					title="-"
 					onPress={() =>
 						removeTracerValue(task, trackerID, tracker_type)
 					}
+					color="#313638"
 				/>
 			</View>
 		);
@@ -182,18 +190,27 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 						console.log(task.id);
 						return (
 							<View key={task.id} style={styles.row}>
-								<Text onPress={() => console.log(task.id)}>
+								<Text
+									style={{ color: "#F0F0F0" }}
+									onPress={() => console.log(task.id)}
+								>
 									{task.name}
 								</Text>
 								{task.tracker_type === 1 ||
 								task.tracker_type === 3 ? (
-									<Text>{trackers[trackerID].count}</Text>
+									<Text style={{ color: "#F0F0F0" }}>
+										{trackers[trackerID].count}
+									</Text>
 								) : null}
 								{task.tracker_type === 2 ||
 								task.tracker_type === 3
 									? [
-											<Text>Hours: {hours}</Text>,
-											<Text>Minutes: {minutes}</Text>,
+											<Text style={{ color: "#F0F0F0" }}>
+												Hours: {hours}
+											</Text>,
+											<Text style={{ color: "#F0F0F0" }}>
+												Minutes: {minutes}
+											</Text>,
 									  ]
 									: null}
 								{task.tracker_type === 3
@@ -215,11 +232,18 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const emptyRender = () => {
 		if (taskTypes !== undefined) {
 			console.log(taskType);
+			console.log(taskTypes[Number(taskType)]);
+			console.log("length: " + tasks.length);
+
 			if (taskTypes[Number(taskType)] !== undefined) {
-				if (Number(taskType) === 3) {
-					return <Text>No Tasks!</Text>;
+				if (Number(taskType) === 3 && tasks.length === 0) {
+					return <Text style={{ color: "#F0F0F0" }}>No Tasks!</Text>;
 				}
-				return <Text>No Tasks in {taskTypes[taskType].value}!</Text>;
+				return (
+					<Text style={{ color: "#F0F0F0" }}>
+						No Tasks in {taskTypes[taskType].value}!
+					</Text>
+				);
 			}
 		}
 		return null;
@@ -236,11 +260,15 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 			</View>
 			<View style={styles.mainView}>
 				<View style={styles.taskTopBar}>
-					<Text style={{ fontSize: 25 }}>TASKS</Text>
+					<Text style={[{ fontSize: 25 }, { color: "#F0F0F0" }]}>
+						TASKS
+					</Text>
 					<SelectList
 						setSelected={setTaskType}
 						data={taskTypes}
 						search={false}
+						inputStyles={{ color: "#F0F0F0" }}
+						dropdownTextStyles={{ color: "#F0F0F0" }}
 						defaultOption={{ key: 0, value: "Active" }}
 					/>
 				</View>
@@ -252,6 +280,26 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 						console.log(tasks);
 						console.log(trackers);
 					}}
+					color="#313638"
+				/>
+				<Button
+					title="delete all trackers"
+					onPress={() => {
+						db.transaction((tx) => {
+							tx.executeSql(
+								"DELETE from trackers",
+								undefined,
+								(txObj, resultSet) => {
+									setTrackers([]);
+								},
+								(txObj, error) => {
+									console.log("error");
+									return true;
+								}
+							);
+						});
+					}}
+					color="#313638"
 				/>
 			</View>
 			<StatusBar style="auto" />
@@ -259,51 +307,52 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 	);
 };
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		flexDirection: "column",
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: "#E3EAE9",
-	},
+const getStyles = (bgColor: ColorValue) =>
+	StyleSheet.create({
+		container: {
+			flex: 1,
+			flexDirection: "column",
+			alignItems: "center",
+			justifyContent: "center",
+			backgroundColor: "#141414",
+		},
 
-	taskTopBar: {
-		width: "100%",
-		flexDirection: "row",
-		justifyContent: "space-between",
-		flex: 1,
-	},
+		taskTopBar: {
+			width: "100%",
+			flexDirection: "row",
+			justifyContent: "space-between",
+			flex: 1,
+		},
 
-	topBar: {
-		width: "100%",
-		flexDirection: "row",
-		backgroundColor: "#BDDED9",
-		justifyContent: "space-between",
-		paddingLeft: 20,
-		alignItems: "center",
-		borderBottomWidth: 2,
-		borderRadius: 20,
-		borderBottomLeftRadius: 0,
-		borderBottomRightRadius: 0,
-	},
+		topBar: {
+			width: "90%",
+			flexDirection: "row",
+			justifyContent: "space-between",
+			paddingLeft: 20,
+			alignItems: "center",
+			borderColor: "#3F3F3F",
+			borderBottomWidth: 0.5,
+			borderRadius: 20,
+			borderBottomLeftRadius: 0,
+			borderBottomRightRadius: 0,
+		},
 
-	mainView: {
-		flex: 1,
-		width: "100%",
-		alignItems: "flex-start",
-		justifyContent: "flex-start",
-		paddingTop: 10,
-		paddingLeft: 10,
-	},
+		mainView: {
+			flex: 1,
+			width: "100%",
+			alignItems: "flex-start",
+			justifyContent: "flex-start",
+			paddingTop: 10,
+			paddingLeft: 10,
+		},
 
-	row: {
-		flexDirection: "row",
-		alignItems: "center",
-		alignSelf: "stretch",
-		justifyContent: "space-between",
-		margin: 8,
-	},
-});
+		row: {
+			flexDirection: "row",
+			alignItems: "center",
+			alignSelf: "stretch",
+			justifyContent: "space-between",
+			margin: 8,
+		},
+	});
 
 export default HomeV2;

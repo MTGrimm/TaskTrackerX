@@ -20,7 +20,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Props {
 	navigation: any;
-	task: {
+	task?: {
 		id: number;
 		name: string;
 		description: string;
