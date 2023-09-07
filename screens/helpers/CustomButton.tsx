@@ -34,14 +34,10 @@ const styles = StyleSheet.create({
 	},
 
 	textStyle: {
-		backgroundColor: "#86D2C6",
-		fontSize: 40,
-		marginTop: 10,
-		marginBottom: 10,
+		color: "#793FDF",
+		fontSize: 50,
 		marginRight: 10,
 		paddingLeft: 10,
-		paddingRight: 10,
-		paddingTop: 0,
 		paddingBottom: 0,
 	},
 });

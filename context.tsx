@@ -12,10 +12,10 @@ export const useDatabaseContext = () => {
 		throw new Error("Ya done messed up buddy");
 	}
 
-	console.log("working here");
-
 	return db;
 };
+
+export const BackgroundColor = createContext<string>("#141414");
 
 interface Tasks {
 	tasks: Array<{
@@ -24,7 +24,7 @@ interface Tasks {
 		description: string;
 		tracker_type: number;
 		time_goal: number;
-		counter_goal: number;
+		count_goal: number;
 		is_active: number;
 	}>;
 	setTasks: React.Dispatch<
@@ -35,7 +35,7 @@ interface Tasks {
 				description: string;
 				tracker_type: number;
 				time_goal: number;
-				counter_goal: number;
+				count_goal: number;
 				is_active: number;
 			}>
 		>
