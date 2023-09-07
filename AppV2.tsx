@@ -29,7 +29,6 @@ export default function App() {
 	const db = SQLite.openDatabase("example4.db");
 	const [isLoading, setIsLoading] = useState(true);
 	const [gettingTasks, setGettingTasks] = useState(true);
-	console.log("init");
 
 	const [tasks, setTasks] = useState<
 		Array<{
@@ -38,7 +37,7 @@ export default function App() {
 			description: string;
 			tracker_type: number;
 			time_goal: number;
-			counter_goal: number;
+			count_goal: number;
 			is_active: number;
 		}>
 	>([]);
@@ -66,12 +65,8 @@ export default function App() {
 	};
 
 	useEffect(() => {
-		console.log("initial useEffects");
-
 		// creating tables if they do not already exist
 		db.transaction((tx) => {
-			console.log("is anything hapappening?");
-
 			tx.executeSql(
 				"CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, tracker_type INTEGER, time_goal INTEGER, count_goal INTEGER, is_active INTEGER )",
 				undefined,
@@ -92,32 +87,25 @@ export default function App() {
 		});
 
 		// getting all the tasks and trackers from the database
-		console.log(db);
 		db.transaction((tx) => {
 			tx.executeSql(
 				"SELECT * FROM tasks",
 				undefined,
 				(txObj, resultSet) => {
 					setTasks(resultSet.rows._array);
-					console.log("tasks", tasks);
 					setGettingTasks(false);
-					console.log("what?");
 				},
 				(txObj, error) => {
-					console.log("owo?");
 					console.log(error);
 					setIsLoading(false);
 					return false;
 				}
 			);
 		});
-		console.log(gettingTasks);
 	}, []);
 
 	useEffect(() => {
 		if (!gettingTasks) {
-			console.log(tasks);
-			console.log("starting trackers");
 			db.transaction((tx) => {
 				const currentDate = getCurrentDate();
 				tx.executeSql(
@@ -125,11 +113,6 @@ export default function App() {
 					[currentDate],
 					(txObj, resultSet) => {
 						setTrackers(resultSet.rows._array);
-						console.log(
-							"length of resultsetrowsarray",
-							resultSet.rows._array.length,
-							resultSet.rows._array
-						);
 
 						let newTracker: Array<{
 							id: number;
@@ -148,7 +131,6 @@ export default function App() {
 								}
 							}
 
-							console.log("length of tasks", tasks.length);
 							for (let i = 0; i < lastIndex + 1; i++) {
 								if (tasks[i].is_active) {
 									tx.executeSql(
@@ -166,10 +148,6 @@ export default function App() {
 													count: 0,
 													task_id: tasks[i].id,
 												});
-												console.log(
-													"added today's tracker for " +
-														tasks[i].name
-												);
 												if (i === lastIndex) {
 													setTrackers(newTracker);
 													setIsLoading(false);
@@ -177,7 +155,6 @@ export default function App() {
 											}
 										},
 										(txObj, error) => {
-											console.log("owo?");
 											console.log(error);
 											return true;
 										}
@@ -189,7 +166,6 @@ export default function App() {
 						}
 					},
 					(txObj, error) => {
-						console.log("owo?");
 						console.log(error);
 						setIsLoading(false);
 

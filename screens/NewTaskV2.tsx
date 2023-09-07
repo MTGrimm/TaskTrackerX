@@ -249,7 +249,7 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 							description: taskDescription,
 							tracker_type: Number(selectedTracker),
 							time_goal: time,
-							counter_goal: count,
+							count_goal: count,
 							is_active: 1,
 						});
 						setTasks(existingTasks);

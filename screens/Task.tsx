@@ -20,7 +20,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Props {
 	navigation: any;
-	task?: {
+	/*task?: {
 		id: number;
 		name: string;
 		description: string;
@@ -28,16 +28,30 @@ interface Props {
 		time_goal: number;
 		counter_goal: number;
 		is_active: number;
-	};
+	};*/
+	route: any;
 }
 
-const Task = ({ navigation, task }: Props) => {
-	const [taskName, setTaskName] = useState("");
-	const [taskDescription, setTaskDescription] = useState("");
-	const [selectedTracker, setSelectedTracker] = useState(1);
-	const [timeGoalHour, setTimeGoalHour] = useState("");
-	const [timeGoalMinute, setTimeGoalMinute] = useState("");
-	const [countGoal, setCountGoal] = useState("");
+const Task = ({ navigation, route }: Props) => {
+	const [taskName, setTaskName] = useState(route.params.task.name);
+	const [taskDescription, setTaskDescription] = useState(
+		route.params.task.description
+	);
+	const [selectedTracker, setSelectedTracker] = useState(
+		route.params.task.tracker_type
+	);
+	const [timeGoalHour, setTimeGoalHour] = useState(
+		Math.floor(route.params.task.time_goal / 60).toString()
+	);
+
+	const [timeGoalMinute, setTimeGoalMinute] = useState(
+		(route.params.task.time_goal - Number(timeGoalHour) * 60).toString()
+	);
+
+	const [countGoal, setCountGoal] = useState(
+		route.params.task.count_goal.toString()
+	);
+
 	const [error, setError] = useState<string | null>(null);
 	const db = useDatabaseContext();
 	const { tasks, setTasks } = useTasksContext();
@@ -67,7 +81,7 @@ const Task = ({ navigation, task }: Props) => {
 						<TextInput
 							value={timeGoalHour}
 							keyboardType="numeric"
-							placeholder="Hours"
+							placeholder={timeGoalHour}
 							onChangeText={setTimeGoalHour}
 							style={[{ flex: 1 }]}
 						/>
@@ -91,7 +105,7 @@ const Task = ({ navigation, task }: Props) => {
 						<TextInput
 							value={timeGoalMinute}
 							keyboardType="numeric"
-							placeholder="Minutes"
+							placeholder={timeGoalMinute}
 							onChangeText={setTimeGoalMinute}
 							style={{ flex: 1 }}
 						/>
@@ -109,7 +123,7 @@ const Task = ({ navigation, task }: Props) => {
 					<TextInput
 						value={countGoal}
 						keyboardType="numeric"
-						placeholder="Count"
+						placeholder={countGoal}
 						onChangeText={setCountGoal}
 						style={{ flex: 1 }}
 					/>
@@ -167,7 +181,7 @@ const Task = ({ navigation, task }: Props) => {
 						Math.floor(Number(countGoal)) === Number(countGoal)
 					) {
 						setError("");
-						addTask(Number(countGoal), 0);
+						updateTask(Number(countGoal), 0);
 					} else
 						setError(
 							"Count value has to be a whole number greater than 0"
@@ -184,7 +198,7 @@ const Task = ({ navigation, task }: Props) => {
 							Number(timeGoalMinute)
 					) {
 						setError("");
-						addTask(0, Number(timeGoal));
+						updateTask(0, Number(timeGoal));
 					} else setError("Time values must be greater than 0");
 				}
 				if (selectedTracker === 3) {
@@ -199,7 +213,7 @@ const Task = ({ navigation, task }: Props) => {
 								Number(timeGoalMinute)
 						) {
 							setError("");
-							addTask(Number(countGoal), Number(timeGoal));
+							updateTask(Number(countGoal), Number(timeGoal));
 						} else
 							setError(
 								"Time values must be whole numbers greater than 0"
@@ -240,10 +254,10 @@ const Task = ({ navigation, task }: Props) => {
 		);
 	};
 
-	const addTask = (count: number, time: number) => {
+	const updateTask = (count: number, time: number) => {
 		db.transaction((tx) => {
 			tx.executeSql(
-				"INSERT INTO tasks (name, description, tracker_type, time_goal, count_goal, is_active) VALUES (?, ?, ?, ?, ?, ?)",
+				"UPDATE tasks SET name = ?, description = ?, tracker_type = ?, time_goal = ?, count_goal = ?, is_active = ? WHERE id = ?",
 				[
 					taskName,
 					taskDescription,
@@ -251,22 +265,34 @@ const Task = ({ navigation, task }: Props) => {
 					time,
 					count,
 					1,
+					route.params.task.id,
 				],
 				(txObj, resultSet) => {
-					const taskID = resultSet.insertId;
-					if (resultSet.rowsAffected !== 0 && taskID !== undefined) {
+					console.log(resultSet.rowsAffected);
+					if (resultSet.rowsAffected !== 0) {
 						let existingTasks = [...tasks];
-						existingTasks.push({
-							id: taskID,
+						const taskIndex = tasks.findIndex((tempTask) => {
+							return tempTask === route.params.task;
+						});
+						/*console.log(
+							route.params.task.id,
+							taskName,
+							taskDescription,
+							Number(selectedTracker),
+							time,
+							count
+						);*/
+						existingTasks[taskIndex] = {
+							id: route.params.task.id,
 							name: taskName,
 							description: taskDescription,
 							tracker_type: Number(selectedTracker),
 							time_goal: time,
-							counter_goal: count,
+							count_goal: count,
 							is_active: 1,
-						});
+						};
 						setTasks(existingTasks);
-						addNewTracker(tx, taskID);
+						navigation.navigate("Home");
 					}
 				},
 				(txObj, error) => {
@@ -292,8 +318,10 @@ const Task = ({ navigation, task }: Props) => {
 								? [{ marginBottom: 0 }, { marginTop: 0 }]
 								: null,
 						]}
+						numberOfLines={1}
+						ellipsizeMode="tail"
 					>
-						Create New Task
+						{route.params.task.name}
 					</Text>
 					{error !== null ? (
 						<Text
@@ -315,7 +343,7 @@ const Task = ({ navigation, task }: Props) => {
 					<Text style={styles.inputText}>Name</Text>
 					<TextInput
 						value={taskName}
-						placeholder="Name"
+						placeholder={route.params.task.name}
 						onChangeText={setTaskName}
 						style={styles.inputBox}
 					/>
@@ -324,7 +352,7 @@ const Task = ({ navigation, task }: Props) => {
 					<Text style={styles.inputText}>Description</Text>
 					<TextInput
 						value={taskDescription}
-						placeholder="Description"
+						placeholder={route.params.task.description}
 						onChangeText={setTaskDescription}
 						style={styles.inputBox}
 					/>
@@ -373,7 +401,7 @@ const Task = ({ navigation, task }: Props) => {
 				<View style={[styles.inputRow]}>{displayTrackerGoal()}</View>
 				<View style={[styles.inputRow, { height: "100%" }]}>
 					<CustomButton
-						name="ADD TASK"
+						name="UPDATE TASK"
 						onPress={() => checkInputs()}
 					/>
 				</View>
@@ -388,7 +416,7 @@ const styles = StyleSheet.create({
 		flexDirection: "column",
 		alignItems: "center",
 		justifyContent: "center",
-		backgroundColor: "#E3EAE9",
+		backgroundColor: "#141414",
 	},
 
 	trackerType: {
@@ -397,7 +425,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-around",
 		alignItems: "center",
-		backgroundColor: "#BDDED9",
+		backgroundColor: "#141414",
 	},
 
 	trackerTouch: {
@@ -408,6 +436,7 @@ const styles = StyleSheet.create({
 
 	trackerText: {
 		textAlign: "center",
+		color: "white",
 		paddingLeft: 35,
 		paddingRight: 35,
 		fontSize: 20,
@@ -415,12 +444,14 @@ const styles = StyleSheet.create({
 
 	inputBox: {
 		flex: 1,
-		backgroundColor: "#BDDED9",
+		backgroundColor: "#252525",
+		color: "#E0E0E0",
 		width: "100%",
 	},
 
 	inputText: {
 		fontSize: 20,
+		color: "white",
 	},
 
 	inputRow: {
@@ -438,13 +469,13 @@ const styles = StyleSheet.create({
 	},
 
 	topBar: {
-		width: "100%",
+		width: "90%",
 		flexDirection: "row",
-		backgroundColor: "#BDDED9",
 		justifyContent: "space-between",
 		paddingLeft: 20,
 		alignItems: "center",
-		borderBottomWidth: 2,
+		borderColor: "#3F3F3F",
+		borderBottomWidth: 0.5,
 		borderRadius: 20,
 		borderBottomLeftRadius: 0,
 		borderBottomRightRadius: 0,
@@ -469,6 +500,7 @@ const styles = StyleSheet.create({
 	},
 
 	textStyle: {
+		color: "white",
 		fontSize: 33,
 		marginTop: 10,
 		marginBottom: 15,
