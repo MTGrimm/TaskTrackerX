@@ -5,6 +5,7 @@ import {
 	TextInput,
 	Button,
 	SafeAreaView,
+	ScrollView,
 } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
 import { useState, useEffect } from "react";
@@ -32,14 +33,17 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 
 	const displayTime = () => {
 		return (
-			<View style={{ flex: 0.7 }}>
-				<Text style={styles.inputText}>Time Goal: </Text>
-				<View style={[{ flexDirection: "row" }]}>
+			<View style={{ flex: 1 }}>
+				<Text style={[styles.inputText, { textAlign: "center" }]}>
+					Time Goal
+				</Text>
+				<View style={[{ flex: 1 }, { flexDirection: "column" }]}>
 					<View
 						style={[
 							{ flex: 1 },
 							{ flexDirection: "row" },
 							{ alignContent: "center" },
+							{ backgroundColor: "#202020" },
 						]}
 					>
 						<Text
@@ -47,16 +51,18 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 								{ flex: 1 },
 								{ textAlignVertical: "center" },
 								{ textAlign: "center" },
+								{ color: "#E0E0E0" },
 							]}
 						>
-							Hours:{" "}
+							Hours:
 						</Text>
 						<TextInput
 							value={timeGoalHour}
 							keyboardType="numeric"
 							placeholder="Hours"
+							placeholderTextColor={"#C0C0C0"}
 							onChangeText={setTimeGoalHour}
-							style={[{ flex: 1 }]}
+							style={[styles.inputBox, { flexGrow: 2 }]}
 						/>
 					</View>
 					<View
@@ -64,6 +70,7 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 							{ flex: 1 },
 							{ flexDirection: "row" },
 							{ alignContent: "center" },
+							{ backgroundColor: "#202020" },
 						]}
 					>
 						<Text
@@ -71,6 +78,7 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 								{ flex: 1 },
 								{ textAlignVertical: "center" },
 								{ textAlign: "center" },
+								{ color: "#E0E0E0" },
 							]}
 						>
 							Minutes:{" "}
@@ -79,8 +87,9 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 							value={timeGoalMinute}
 							keyboardType="numeric"
 							placeholder="Minutes"
+							placeholderTextColor={"#C0C0C0"}
 							onChangeText={setTimeGoalMinute}
-							style={{ flex: 1 }}
+							style={[styles.inputBox, { flexGrow: 2 }]}
 						/>
 					</View>
 				</View>
@@ -90,15 +99,24 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 
 	const displayCounter = () => {
 		return (
-			<View style={[{ flex: 0.5 }, { flexDirection: "row" }]}>
-				<Text style={styles.inputText}>Counter Goal: </Text>
-				<View>
+			<View style={[{ flex: 1 }, { flexDirection: "column" }]}>
+				<Text style={[styles.inputText, { textAlign: "center" }]}>
+					Counter Goal
+				</Text>
+				<View
+					style={[
+						{ flex: 1 },
+						{ justifyContent: "center" },
+						{ alignItems: "center" },
+					]}
+				>
 					<TextInput
 						value={countGoal}
 						keyboardType="numeric"
 						placeholder="Count"
+						placeholderTextColor={"#C0C0C0"}
 						onChangeText={setCountGoal}
-						style={{ flex: 1 }}
+						style={styles.inputBox}
 					/>
 				</View>
 			</View>
@@ -107,17 +125,23 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 
 	const displayTrackerGoal = () => {
 		if (selectedTracker === 1) {
-			return displayCounter();
+			return <View style={[{ flex: 0.8 }]}>{displayCounter()}</View>;
 		} else if (selectedTracker === 2) {
-			return displayTime();
+			return <View style={[{ flex: 0.8 }]}>{displayTime()}</View>;
 		} else {
 			return (
-				<View style={[{ flex: 1 }, { flexDirection: "column" }]}>
-					<View style={[{ flexDirection: "row" }]}>
-						{displayTime()}
-					</View>
-					<View style={[{ flexDirection: "row" }]}>
+				<View style={[{ flex: 0.8 }, { flexDirection: "row" }]}>
+					<View
+						style={[
+							{ flex: 0.69 },
+							{ flexDirection: "row" },
+							{ marginRight: 3 },
+						]}
+					>
 						{displayCounter()}
+					</View>
+					<View style={[{ flex: 1 }, { flexDirection: "column" }]}>
+						{displayTime()}
 					</View>
 				</View>
 			);
@@ -298,22 +322,32 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 				</View>
 			</View>
 			<View style={styles.mainView}>
-				<View style={styles.inputRow}>
-					<Text style={styles.inputText}>Name</Text>
+				<View style={[styles.inputRow, { flex: 0.8 }]}>
+					<Text style={[styles.inputText]}>Name</Text>
 					<TextInput
 						value={taskName}
 						placeholder="Name"
+						placeholderTextColor={"#C0C0C0"}
 						onChangeText={setTaskName}
-						style={styles.inputBox}
+						style={[
+							styles.inputBox,
+							{ textAlign: "left" },
+							{ paddingHorizontal: 10 },
+						]}
 					/>
 				</View>
-				<View style={[styles.inputRow, { flex: 2 }]}>
+				<View style={[styles.inputRow, { flex: 1.2 }]}>
 					<Text style={styles.inputText}>Description</Text>
 					<TextInput
 						value={taskDescription}
 						placeholder="Description"
+						placeholderTextColor={"#C0C0C0"}
 						onChangeText={setTaskDescription}
-						style={styles.inputBox}
+						style={[
+							styles.inputBox,
+							{ textAlign: "left" },
+							{ paddingHorizontal: 10 },
+						]}
 					/>
 				</View>
 				<View style={styles.inputRow}>
@@ -324,36 +358,63 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 							style={[
 								styles.trackerTouch,
 								selectedTracker === 1
-									? { backgroundColor: "#86D2C6" }
+									? styles.trackerOverride
 									: null,
 							]}
 							onPress={() => handleTracker(1)}
 						>
-							<Text style={[styles.trackerText]}>Count</Text>
+							<Text
+								style={[
+									styles.trackerText,
+									selectedTracker === 1
+										? { color: "black" }
+										: null,
+								]}
+							>
+								Count
+							</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							activeOpacity={1}
 							style={[
 								styles.trackerTouch,
 								selectedTracker === 2
-									? { backgroundColor: "#86D2C6" }
+									? { backgroundColor: "#793FDF" }
 									: null,
 							]}
 							onPress={() => handleTracker(2)}
 						>
-							<Text style={styles.trackerText}>Time</Text>
+							<Text
+								style={[
+									styles.trackerText,
+									selectedTracker === 2
+										? { color: "black" }
+										: null,
+								]}
+							>
+								Time
+							</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							activeOpacity={1}
 							style={[
 								styles.trackerTouch,
 								selectedTracker === 3
-									? { backgroundColor: "#86D2C6" }
+									? { backgroundColor: "#793FDF" }
 									: null,
 							]}
 							onPress={() => handleTracker(3)}
 						>
-							<Text style={styles.trackerText}>Both</Text>
+							<Text
+								style={[
+									styles.trackerText,
+									selectedTracker === 3
+										? { color: "black" }
+										: null,
+								]}
+							>
+								Both
+							</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
@@ -391,18 +452,26 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: "center",
 		justifyContent: "center",
+		backgroundColor: "#303030",
 	},
 
 	trackerText: {
 		textAlign: "center",
+		color: "#D0D0D0",
 		paddingLeft: 35,
 		paddingRight: 35,
 		fontSize: 20,
 	},
 
+	trackerOverride: {
+		backgroundColor: "#793FDF",
+	},
+
 	inputBox: {
 		flex: 1,
-		backgroundColor: "#141414",
+		backgroundColor: "#252525",
+		textAlign: "center",
+		color: "#E0E0E0",
 		width: "100%",
 	},
 
