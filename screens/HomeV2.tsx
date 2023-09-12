@@ -6,6 +6,7 @@ import {
 	Button,
 	SafeAreaView,
 	ColorValue,
+	TouchableWithoutFeedback,
 } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
 import { useState, useEffect, useContext } from "react";
@@ -18,6 +19,7 @@ import {
 	useTrackersContext,
 } from "../context";
 import CustomButton from "./helpers/CustomButton";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const db = useDatabaseContext();
@@ -138,23 +140,23 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 		tracker_type: number
 	) => {
 		return (
-			<View style={styles.taskContentContainer}>
-				<Text
+			<View style={styles.valButtonContainer}>
+				<TouchableOpacity
 					onPress={() =>
 						addTrackerValue(task, trackerID, tracker_type)
 					}
-					style={{ color: "#793FDF" }}
+					style={styles.valButton}
 				>
-					+
-				</Text>
-				<Text
+					<Text style={styles.valButtonText}>+</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
 					onPress={() =>
 						removeTracerValue(task, trackerID, tracker_type)
 					}
-					style={{ color: "#793FDF" }}
+					style={styles.valButton}
 				>
-					-
-				</Text>
+					<Text style={styles.valButtonText}>-</Text>
+				</TouchableOpacity>
 			</View>
 		);
 	};
@@ -187,7 +189,7 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 						const hours = Math.floor(trackers[trackerID].time / 60);
 						const minutes = trackers[trackerID].time - hours * 60;
 						return (
-							<View key={task.id}>
+							<View key={task.id} style={{ marginBottom: 15 }}>
 								<View style={styles.taskTitleContainer}>
 									<Text
 										style={styles.taskText}
@@ -200,50 +202,84 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 										{task.name}
 									</Text>
 								</View>
-
-								{task.tracker_type === 1 && (
-									<View style={styles.taskContentContainer}>
-										<Text style={{ color: "#F0F0F0" }}>
-											{trackers[trackerID].count}
-										</Text>
-										{valueButton(task, trackerID, 1)}
-									</View>
-								)}
-
-								{task.tracker_type === 2 && (
-									<View style={styles.taskContentContainer}>
-										<Text style={{ color: "#F0F0F0" }}>
-											{trackers[trackerID].time}
-										</Text>
-										{valueButton(task, trackerID, 2)}
-									</View>
-								)}
-
-								{task.tracker_type === 3 && (
-									<View
-										style={[
-											{ flexDirection: "row" },
-											{ width: "100%" },
-										]}
-									>
+								<View
+									style={[
+										{ flexDirection: "row" },
+										{ width: "92%" },
+									]}
+								>
+									{task.tracker_type === 1 && (
 										<View
 											style={styles.taskContentContainer}
 										>
-											<Text style={{ color: "#F0F0F0" }}>
-												{trackers[trackerID].count}
+											<Text style={styles.trackerText}>
+												{trackers[trackerID].count}x
 											</Text>
 											{valueButton(task, trackerID, 1)}
 										</View>
+									)}
+
+									{task.tracker_type === 2 && (
 										<View
 											style={styles.taskContentContainer}
 										>
-											<Text style={{ color: "#F0F0F0" }}>
-												{trackers[trackerID].time}
+											<Text style={styles.trackerText}>
+												{hours}h {minutes}m
 											</Text>
 											{valueButton(task, trackerID, 2)}
 										</View>
-									</View>
-								)}
+									)}
+
+									{task.tracker_type === 3 && (
+										<View
+											style={[
+												{ flexDirection: "row" },
+												{ flex: 1 },
+											]}
+										>
+											<View
+												style={[
+													styles.taskContentContainer,
+													{ flex: 0.75 },
+												]}
+											>
+												<Text
+													style={[
+														styles.trackerText,
+														{ flexGrow: 1.5 },
+													]}
+												>
+													{trackers[trackerID].count}x
+												</Text>
+												{valueButton(
+													task,
+													trackerID,
+													1
+												)}
+											</View>
+											<View
+												style={[
+													styles.taskContentContainer,
+													{ marginLeft: 0 },
+												]}
+											>
+												<Text
+													style={[
+														styles.trackerText,
+														{ flexGrow: 1.5 },
+													]}
+												>
+													{hours}h {minutes}m
+												</Text>
+												{valueButton(
+													task,
+													trackerID,
+													2
+												)}
+											</View>
+										</View>
+									)}
+								</View>
 
 								{/* <View style={styles.taskContentContainer}>
 									{(task.tracker_type === 1 ||
@@ -365,24 +401,55 @@ const getStyles = (bgColor: ColorValue) =>
 			backgroundColor: "#141414",
 		},
 
+		valButtonText: {
+			color: "#793FDF",
+			fontSize: 28,
+		},
+
+		valButton: {
+			paddingHorizontal: 9,
+		},
+
+		valButtonContainer: {
+			flex: 1,
+			backgroundColor: "#202020",
+			width: "100%",
+			flexDirection: "row",
+			alignItems: "center",
+			alignSelf: "stretch",
+			justifyContent: "flex-end",
+			margin: 8,
+			marginLeft: 0,
+			marginTop: 0,
+		},
+
+		trackerText: {
+			color: "#F0F0F0",
+			flex: 0.5,
+			fontSize: 18,
+			textAlign: "center",
+			flexGrow: 5,
+		},
+
 		taskText: {
 			padding: 10,
 			paddingLeft: 25,
 			width: "100%",
 			color: "#E0E0E0",
-			fontSize: 20,
+			fontSize: 22,
 		},
 
 		taskContentContainer: {
+			flex: 1,
 			backgroundColor: "#202020",
-			width: "30%",
-			borderBottomLeftRadius: 30,
-			borderBottomRightRadius: 30,
+			borderBottomLeftRadius: 25,
+			borderBottomRightRadius: 25,
 			flexDirection: "row",
 			alignItems: "center",
 			alignSelf: "stretch",
-			justifyContent: "space-around",
-			margin: 8,
+			justifyContent: "center",
+			marginLeft: 8,
+			marignBottom: 10,
 			marginTop: 0,
 		},
 
@@ -409,7 +476,7 @@ const getStyles = (bgColor: ColorValue) =>
 		},
 
 		topBar: {
-			width: "90%",
+			width: "92%",
 			flexDirection: "row",
 			justifyContent: "space-between",
 			paddingLeft: 20,
@@ -423,7 +490,7 @@ const getStyles = (bgColor: ColorValue) =>
 
 		mainView: {
 			flex: 1,
-			width: "90%",
+			width: "92%",
 			alignItems: "flex-start",
 			justifyContent: "flex-start",
 			paddingTop: 10,
