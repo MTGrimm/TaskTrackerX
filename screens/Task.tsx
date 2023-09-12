@@ -336,6 +336,30 @@ const Task = ({ navigation, route }: Props) => {
 		});
 	};
 
+	const deleteTask = () => {
+		console.log(route.params.task.id);
+		db.transaction((tx) => {
+			tx.executeSql(
+				"DELETE FROM tasks WHERE id = ?",
+				[route.params.task.id],
+				(txObj, resultSet) => {
+					if (resultSet.rowsAffected > 0) {
+						let existingTasks = [...tasks].filter(
+							(task) => task.id !== route.params.task.id
+						);
+						setTasks(existingTasks);
+
+						navigation.navigate("Home");
+					}
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.topBar}>
@@ -370,6 +394,18 @@ const Task = ({ navigation, route }: Props) => {
 						</Text>
 					) : null}
 				</View>
+				<TouchableOpacity
+					style={[
+						{ backgroundColor: "#C40234" },
+						{ alignItems: "center" },
+						{ justifyContent: "center" },
+						{ paddingVertical: 5 },
+						{ paddingHorizontal: 3 },
+					]}
+					onPress={() => deleteTask()}
+				>
+					<Text style={[{ textAlign: "center" }]}>🗑</Text>
+				</TouchableOpacity>
 			</View>
 			<View style={styles.mainView}>
 				<View style={[styles.inputRow, { flex: 0.8 }]}>
@@ -585,5 +621,6 @@ const styles = StyleSheet.create({
 		paddingBottom: 0,
 	},
 });
+//
 
 export default Task;
