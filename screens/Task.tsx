@@ -621,5 +621,6 @@ const styles = StyleSheet.create({
 		paddingBottom: 0,
 	},
 });
+//
 
 export default Task;
