@@ -21,6 +21,7 @@ import * as SQLite from "expo-sqlite";
 import HomeV2 from "./screens/HomeV2";
 import NewTaskV2 from "./screens/NewTaskV2";
 import Task from "./screens/Task";
+import Graph from "./screens/Graph";
 
 const Stack = createStackNavigator();
 
@@ -114,7 +115,7 @@ export default function App() {
 					(txObj, resultSet) => {
 						setTrackers(resultSet.rows._array);
 
-						let newTracker: Array<{
+						let newTrackers: Array<{
 							id: number;
 							date: string;
 							time: number;
@@ -141,7 +142,7 @@ export default function App() {
 											if (
 												resultSet.insertId !== undefined
 											) {
-												newTracker.push({
+												newTrackers.push({
 													id: resultSet.insertId,
 													date: currentDate,
 													time: 0,
@@ -149,7 +150,7 @@ export default function App() {
 													task_id: tasks[i].id,
 												});
 												if (i === lastIndex) {
-													setTrackers(newTracker);
+													setTrackers(newTrackers);
 													setIsLoading(false);
 												}
 											}
@@ -206,6 +207,10 @@ export default function App() {
 									<Stack.Screen
 										name={"Task"}
 										component={Task}
+									/>
+									<Stack.Screen
+										name={"Graph"}
+										component={Graph}
 									/>
 								</Stack.Navigator>
 							</NavigationContainer>

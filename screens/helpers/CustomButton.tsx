@@ -12,16 +12,29 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 interface Props {
 	name: string;
 	onPress: () => void;
+	backgroundColor?: any;
+	color?: any;
 }
 
-const CustomButton = ({ name, onPress }: Props) => {
+const CustomButton = ({ name, onPress, backgroundColor, color }: Props) => {
 	return (
 		<TouchableOpacity
-			style={styles.buttonContainer}
-			activeOpacity={1}
+			style={[
+				styles.buttonContainer,
+				backgroundColor === undefined
+					? null
+					: { backgroundColor: backgroundColor },
+			]}
 			onPress={onPress}
 		>
-			<Text style={styles.textStyle}>{name}</Text>
+			<Text
+				style={[
+					styles.textStyle,
+					color === undefined ? null : { color: color },
+				]}
+			>
+				{name}
+			</Text>
 		</TouchableOpacity>
 	);
 };

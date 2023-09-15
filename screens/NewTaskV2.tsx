@@ -51,6 +51,7 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 								{ flex: 1 },
 								{ textAlignVertical: "center" },
 								{ textAlign: "center" },
+								{ alignSelf: "center" },
 								{ color: "#E0E0E0" },
 							]}
 						>
@@ -78,6 +79,7 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 								{ flex: 1 },
 								{ textAlignVertical: "center" },
 								{ textAlign: "center" },
+								{ alignSelf: "center" },
 								{ color: "#E0E0E0" },
 							]}
 						>
@@ -423,6 +425,8 @@ const NewTaskV2 = ({ navigation }: { navigation: any }) => {
 					<CustomButton
 						name="ADD TASK"
 						onPress={() => checkInputs()}
+						backgroundColor={"#793FDF"}
+						color="#202020"
 					/>
 				</View>
 			</View>
