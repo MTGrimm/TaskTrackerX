@@ -7,7 +7,7 @@ import {
 	SafeAreaView,
 } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import * as SQLite from "expo-sqlite";
 import { StatusBar } from "expo-status-bar";
 import {
@@ -18,6 +18,7 @@ import {
 import CustomButton from "./helpers/CustomButton";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { LineChart } from "react-native-gifted-charts";
 
 interface Props {
 	navigation: any;
@@ -26,14 +27,48 @@ interface Props {
 
 const Graph = ({ navigation, route }: Props) => {
 	const [error, setError] = useState<string | null>(null);
-	const [date, setDate] = useState(new Date(1598051730000));
+	const [startDate, setStartDate] = useState(new Date());
+	const [endDate, setEndDate] = useState(new Date());
 	const [showStartDate, setShowStartDate] = useState(false);
+	const [showEndDate, setShowEndDate] = useState(false);
+	const [dataArray, changeDataArray] = useState([]);
 
-	const changeDate = (event: any, selectedDate: Date | undefined) => {
+	useEffect(() => {}, [dataArray]);
+
+	const changeDate = (
+		event: any,
+		selectedDate: Date | undefined,
+		setDate: React.Dispatch<SetStateAction<Date>>,
+		type: number
+	) => {
 		if (selectedDate !== undefined) {
 			setDate(selectedDate);
-			setShowStartDate(false);
+			if (type === 1) {
+				setShowStartDate(false);
+			} else {
+				setShowEndDate(false);
+			}
 		}
+	};
+
+	const getFormattedDate = (date: Date) => {
+		const month = String(date.getMonth() + 1).padStart(2, "0");
+		const day = String(date.getDate()).padStart(2, "0");
+		const year = date.getFullYear();
+
+		const formattedDate = `${month}/${day}/${year}`;
+		return formattedDate;
+	};
+
+	const generateDates = () => {
+		let currentDate = new Date(startDate);
+		let tempData = [];
+		console.log(currentDate);
+		while (currentDate <= endDate) {
+			tempData.push(currentDate);
+			currentDate.setDate(currentDate.getDate() + 1);
+		}
+		console.log(tempData);
 	};
 
 	return (
@@ -72,20 +107,58 @@ const Graph = ({ navigation, route }: Props) => {
 				</View>
 			</View>
 			<View style={styles.mainView}>
+				<View style={styles.taskTopBar}>
+					<View>
+						<Button
+							title="select start date"
+							onPress={() => setShowStartDate(true)}
+						/>
+						{showStartDate && (
+							<DateTimePicker
+								testID="dateTimePicker"
+								value={startDate}
+								onChange={(event, selectedDate) =>
+									changeDate(
+										event,
+										selectedDate,
+										setStartDate,
+										1
+									)
+								}
+							/>
+						)}
+						<Text style={[{ fontSize: 30 }, { color: "white" }]}>
+							{getFormattedDate(startDate)}
+						</Text>
+					</View>
+					<View>
+						<Button
+							title="select end date"
+							onPress={() => setShowEndDate(true)}
+						/>
+						{showEndDate && (
+							<DateTimePicker
+								testID="dateTimePicker"
+								value={endDate}
+								onChange={(event, selectedDate) =>
+									changeDate(
+										event,
+										selectedDate,
+										setEndDate,
+										2
+									)
+								}
+							/>
+						)}
+						<Text style={[{ fontSize: 30 }, { color: "white" }]}>
+							{getFormattedDate(endDate)}
+						</Text>
+					</View>
+				</View>
 				<Button
-					title="select start date"
-					onPress={() => setShowStartDate(true)}
+					title="generate dates"
+					onPress={() => generateDates()}
 				/>
-				{showStartDate && (
-					<DateTimePicker
-						testID="dateTimePicker"
-						value={date}
-						onChange={changeDate}
-					/>
-				)}
-				<Text style={[{ fontSize: 30 }, { color: "white" }]}>
-					{date.toDateString()}
-				</Text>
 			</View>
 		</View>
 	);
