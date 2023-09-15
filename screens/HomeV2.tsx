@@ -134,6 +134,52 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 		}
 	};
 
+	const getNewTrackers = (currentDate: string) => {
+		let newTrackers: Array<{
+			id: number;
+			date: string;
+			time: number;
+			count: number;
+			task_id: number;
+		}> = [];
+
+		let lastIndex = 0;
+		let taskLength = tasks.length;
+		for (let i = 0; i < taskLength; i++) {
+			if (tasks[taskLength - 1 - i].is_active) {
+				lastIndex = taskLength - 1 - i;
+				break;
+			}
+		}
+
+		for (let i = 0; i < lastIndex + 1; i++) {
+			db.transaction((tx) => {
+				tx.executeSql(
+					"INSERT INTO trackers (date, time, count, task_id) VALUES (?, ?, ?, ?)",
+					[currentDate, 0, 0, tasks[i].id],
+					(txObj, resultSet) => {
+						if (resultSet.insertId !== undefined) {
+							newTrackers.push({
+								id: resultSet.insertId,
+								date: currentDate,
+								time: 0,
+								count: 0,
+								task_id: tasks[i].id,
+							});
+							if (i === lastIndex) {
+								setTrackers(newTrackers);
+							}
+						}
+					},
+					(txObj, error) => {
+						console.log(error);
+						return false;
+					}
+				);
+			});
+		}
+	};
+
 	const valueButton = (
 		task: any,
 		trackerID: number,
@@ -311,6 +357,8 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 								</View>*/}
 							</View>
 						);
+					} else {
+						getNewTrackers(currentDate);
 					}
 				}
 			}

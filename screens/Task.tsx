@@ -20,15 +20,6 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Props {
 	navigation: any;
-	/*task?: {
-		id: number;
-		name: string;
-		description: string;
-		tracker_type: number;
-		time_goal: number;
-		counter_goal: number;
-		is_active: number;
-	};*/
 	route: any;
 }
 
@@ -503,11 +494,31 @@ const Task = ({ navigation, route }: Props) => {
 					</View>
 				</View>
 				<View style={[styles.inputRow]}>{displayTrackerGoal()}</View>
-				<View style={[styles.inputRow, { height: "100%" }]}>
-					<CustomButton
-						name="UPDATE TASK"
-						onPress={() => checkInputs()}
-					/>
+				<View
+					style={[
+						styles.inputRow,
+						{ height: "100%" },
+						{ flexDirection: "row" },
+					]}
+				>
+					<View style={{ flex: 1 }}>
+						<CustomButton
+							name="UPDATE"
+							onPress={() => checkInputs()}
+							backgroundColor={"#793FDF"}
+							color="#202020"
+						/>
+					</View>
+					<TouchableOpacity
+						style={[{ flex: 1 }]}
+						onPress={() =>
+							navigation.navigate("Graph", {
+								task: route.params.task,
+							})
+						}
+					>
+						<Text style={[{ fontSize: 50 }]}>📈</Text>
+					</TouchableOpacity>
 				</View>
 			</View>
 		</View>
@@ -621,6 +632,5 @@ const styles = StyleSheet.create({
 		paddingBottom: 0,
 	},
 });
-//
 
 export default Task;
