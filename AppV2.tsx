@@ -70,7 +70,7 @@ export default function App() {
 		db.transaction((tx) => {
 			tx.executeSql(
 				"CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT, tracker_type INTEGER, time_goal INTEGER, count_goal INTEGER, is_active INTEGER )",
-				undefined,
+				[],
 				(txObj, resultSet) => {
 					console.log("YA?");
 				},
@@ -91,8 +91,9 @@ export default function App() {
 		db.transaction((tx) => {
 			tx.executeSql(
 				"SELECT * FROM tasks",
-				undefined,
+				[],
 				(txObj, resultSet) => {
+					console.log("huh");
 					setTasks(resultSet.rows._array);
 					setGettingTasks(false);
 				},
@@ -107,6 +108,7 @@ export default function App() {
 
 	useEffect(() => {
 		if (!gettingTasks) {
+			console.log("where?");
 			db.transaction((tx) => {
 				const currentDate = getCurrentDate();
 				tx.executeSql(

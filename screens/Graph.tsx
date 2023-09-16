@@ -26,14 +26,60 @@ interface Props {
 }
 
 const Graph = ({ navigation, route }: Props) => {
+	const db = useDatabaseContext();
 	const [error, setError] = useState<string | null>(null);
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(new Date());
 	const [showStartDate, setShowStartDate] = useState(false);
 	const [showEndDate, setShowEndDate] = useState(false);
-	const [dataArray, changeDataArray] = useState([]);
+	const [dataArray, setDataArray] = useState<{ value: number }[]>([]);
+	const [dateArray, setDateArray] = useState<string[]>([]);
 
-	useEffect(() => {}, [dataArray]);
+	useEffect(() => {
+		//for (let i = 0; i < dateArray.length; i++) {
+		console.log("?");
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT count, date
+				FROM trackers
+				WHERE task_id = ? AND date IN (${dateArray.map(() => "?").join(", ")})
+				`,
+				[route.params.task.id, ...dateArray],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+					const tempResults = resultSet.rows._array;
+					const tempData = [];
+					let resultIndex = 0;
+					for (let i = 0; i < dateArray.length; i++) {
+						if (
+							resultIndex >= tempResults.length ||
+							dateArray[i] !== tempResults[resultIndex].date
+						) {
+							tempData.push({
+								value: 0,
+								dataPointText: dateArray[i],
+							});
+						} else {
+							tempData.push({
+								value: tempResults[resultIndex].count,
+								dataPointText: dateArray[i],
+							});
+							resultIndex++;
+						}
+						console.log(resultIndex);
+					}
+					console.log(tempData);
+					setDataArray(tempData);
+				},
+				(txObj, error) => {
+					console.log("nope ya done messed up");
+					return false;
+				}
+			);
+		});
+		//}
+	}, [dateArray]);
 
 	const changeDate = (
 		event: any,
@@ -65,10 +111,11 @@ const Graph = ({ navigation, route }: Props) => {
 		let tempData = [];
 		console.log(currentDate);
 		while (currentDate <= endDate) {
-			tempData.push(currentDate);
+			tempData.push(getFormattedDate(new Date(currentDate)));
 			currentDate.setDate(currentDate.getDate() + 1);
 		}
 		console.log(tempData);
+		setDateArray(tempData);
 	};
 
 	return (
@@ -155,6 +202,25 @@ const Graph = ({ navigation, route }: Props) => {
 						</Text>
 					</View>
 				</View>
+				{dataArray.length !== 0 && (
+					<LineChart
+						data={dataArray}
+						thickness={4}
+						spacing={40}
+						dataPointsColor={"red"}
+						textColor1={"yellow"}
+						textColor={"red"}
+						xAxisLabelTextStyle={{ color: "red" }}
+						focusEnabled={true}
+						showTextOnFocus={true}
+						textShiftY={-8}
+						textShiftX={-10}
+						textFontSize={13}
+						verticalLinesColor={"rgba(14,164,164,0.5)"}
+						xAxisColor="#505050"
+						color="#0BA5A4"
+					/>
+				)}
 				<Button
 					title="generate dates"
 					onPress={() => generateDates()}
