@@ -203,23 +203,31 @@ const Graph = ({ navigation, route }: Props) => {
 					</View>
 				</View>
 				{dataArray.length !== 0 && (
-					<LineChart
-						data={dataArray}
-						thickness={4}
-						spacing={40}
-						dataPointsColor={"red"}
-						textColor1={"yellow"}
-						textColor={"red"}
-						xAxisLabelTextStyle={{ color: "red" }}
-						focusEnabled={true}
-						showTextOnFocus={true}
-						textShiftY={-8}
-						textShiftX={-10}
-						textFontSize={13}
-						verticalLinesColor={"rgba(14,164,164,0.5)"}
-						xAxisColor="#505050"
-						color="#0BA5A4"
-					/>
+					<View style={styles.graphView}>
+						<LineChart
+							data={dataArray}
+							backgroundColor={"#3D246C"}
+							thickness={4}
+							spacing={40}
+							yAxisTextStyle={{ color: "#E0E0E0" }}
+							dataPointsColor={"red"}
+							textColor1={"yellow"}
+							textColor={"red"}
+							xAxisLabelTextStyle={{ color: "red" }}
+							focusEnabled={true}
+							showTextOnFocus={true}
+							showVerticalLines
+							hideRules
+							textShiftY={-8}
+							textShiftX={-10}
+							textFontSize={13}
+							hideDataPoints
+							verticalLinesColor={"#BEADFA"}
+							xAxisColor="#505050"
+							color="#0BA5A4"
+							showScrollIndicator={false}
+						/>
+					</View>
 				)}
 				<Button
 					title="generate dates"
@@ -237,6 +245,10 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: "#141414",
+	},
+
+	graphView: {
+		flex: 1,
 	},
 
 	trackerType: {
