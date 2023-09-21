@@ -5,6 +5,7 @@ import {
 	TextInput,
 	Button,
 	SafeAreaView,
+	Platform,
 } from "react-native";
 import { SelectList } from "react-native-dropdown-select-list";
 import { useState, useEffect, SetStateAction } from "react";
@@ -16,9 +17,10 @@ import {
 	useTrackersContext,
 } from "../context";
 import CustomButton from "./helpers/CustomButton";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { LineChart } from "react-native-gifted-charts";
+import { Slider } from "@react-native-assets/slider";
 
 interface Props {
 	navigation: any;
@@ -34,6 +36,44 @@ const Graph = ({ navigation, route }: Props) => {
 	const [showEndDate, setShowEndDate] = useState(false);
 	const [dataArray, setDataArray] = useState<{ value: number }[]>([]);
 	const [dateArray, setDateArray] = useState<string[]>([]);
+	const [mean, setMean] = useState(0);
+	const [nzMean, setNzMean] = useState(0);
+	const [meanType, setMeanType] = useState(0);
+	const [median, setMedian] = useState(0);
+	const [mode, setMode] = useState(0);
+	const [spacing, setSpacing] = useState(0);
+	const [spacingScale, setSpacingScale] = useState(1);
+
+	const dynamicSpacing = () => {
+		if (dataArray.length !== 0) {
+			setSpacing((500 * spacingScale) / dataArray.length);
+		}
+	};
+
+	useEffect(() => {
+		console.log("repeat?");
+		dynamicSpacing();
+	}, [spacingScale]);
+
+	const handleMean = () => {
+		let sum = 0;
+		for (let i = 0; i < dataArray.length; i++) {
+			sum += dataArray[i].value;
+		}
+		setMean(sum / dataArray.length);
+	};
+
+	const handleNzMean = () => {
+		let nzSum = 0;
+		let nzLength = 0;
+		for (let i = 0; i < dataArray.length; i++) {
+			if (dataArray[i].value !== 0) {
+				nzSum += dataArray[i].value;
+				nzLength++;
+			}
+		}
+		setNzMean(nzSum / nzLength);
+	};
 
 	useEffect(() => {
 		//for (let i = 0; i < dateArray.length; i++) {
@@ -69,6 +109,10 @@ const Graph = ({ navigation, route }: Props) => {
 						}
 						console.log(resultIndex);
 					}
+
+					handleMean();
+					handleNzMean();
+					dynamicSpacing();
 					console.log(tempData);
 					setDataArray(tempData);
 				},
@@ -78,7 +122,6 @@ const Graph = ({ navigation, route }: Props) => {
 				}
 			);
 		});
-		//}
 	}, [dateArray]);
 
 	const changeDate = (
@@ -118,6 +161,49 @@ const Graph = ({ navigation, route }: Props) => {
 		setDateArray(tempData);
 	};
 
+	const handleDateSelection = () => {
+		return (
+			<View style={styles.taskTopBar}>
+				<View>
+					<Button
+						title="select start date"
+						onPress={() => setShowStartDate(true)}
+					/>
+					{showStartDate && (
+						<DateTimePicker
+							testID="dateTimePicker"
+							value={startDate}
+							onChange={(event, selectedDate) =>
+								changeDate(event, selectedDate, setStartDate, 1)
+							}
+						/>
+					)}
+					<Text style={[{ fontSize: 30 }, { color: "white" }]}>
+						{getFormattedDate(startDate)}
+					</Text>
+				</View>
+				<View>
+					<Button
+						title="select end date"
+						onPress={() => setShowEndDate(true)}
+					/>
+					{showEndDate && (
+						<DateTimePicker
+							testID="dateTimePicker"
+							value={endDate}
+							onChange={(event, selectedDate) =>
+								changeDate(event, selectedDate, setEndDate, 2)
+							}
+						/>
+					)}
+					<Text style={[{ fontSize: 30 }, { color: "white" }]}>
+						{getFormattedDate(endDate)}
+					</Text>
+				</View>
+			</View>
+		);
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.topBar}>
@@ -154,79 +240,47 @@ const Graph = ({ navigation, route }: Props) => {
 				</View>
 			</View>
 			<View style={styles.mainView}>
-				<View style={styles.taskTopBar}>
-					<View>
-						<Button
-							title="select start date"
-							onPress={() => setShowStartDate(true)}
-						/>
-						{showStartDate && (
-							<DateTimePicker
-								testID="dateTimePicker"
-								value={startDate}
-								onChange={(event, selectedDate) =>
-									changeDate(
-										event,
-										selectedDate,
-										setStartDate,
-										1
-									)
-								}
-							/>
-						)}
-						<Text style={[{ fontSize: 30 }, { color: "white" }]}>
-							{getFormattedDate(startDate)}
-						</Text>
-					</View>
-					<View>
-						<Button
-							title="select end date"
-							onPress={() => setShowEndDate(true)}
-						/>
-						{showEndDate && (
-							<DateTimePicker
-								testID="dateTimePicker"
-								value={endDate}
-								onChange={(event, selectedDate) =>
-									changeDate(
-										event,
-										selectedDate,
-										setEndDate,
-										2
-									)
-								}
-							/>
-						)}
-						<Text style={[{ fontSize: 30 }, { color: "white" }]}>
-							{getFormattedDate(endDate)}
-						</Text>
-					</View>
-				</View>
+				{handleDateSelection()}
 				{dataArray.length !== 0 && (
-					<View style={styles.graphView}>
-						<LineChart
-							data={dataArray}
-							backgroundColor={"#3D246C"}
-							thickness={4}
-							spacing={40}
-							yAxisTextStyle={{ color: "#E0E0E0" }}
-							dataPointsColor={"red"}
-							textColor1={"yellow"}
-							textColor={"red"}
-							xAxisLabelTextStyle={{ color: "red" }}
-							focusEnabled={true}
-							showTextOnFocus={true}
-							showVerticalLines
-							hideRules
-							textShiftY={-8}
-							textShiftX={-10}
-							textFontSize={13}
-							hideDataPoints
-							verticalLinesColor={"#BEADFA"}
-							xAxisColor="#505050"
-							color="#0BA5A4"
-							showScrollIndicator={false}
+					<LineChart
+						data={dataArray}
+						backgroundColor={"#3D246C"}
+						thickness={5}
+						spacing={spacing}
+						yAxisTextStyle={{ color: "#E0E0E0" }}
+						dataPointsColor={"#0BA5A4"}
+						dataPointsWidth={1}
+						textColor1={"yellow"}
+						textColor={"red"}
+						xAxisLabelTextStyle={{ color: "red" }}
+						focusEnabled={true}
+						showTextOnFocus={true}
+						showVerticalLines
+						hideRules
+						textShiftY={-8}
+						textShiftX={-10}
+						textFontSize={13}
+						verticalLinesColor={"#BEADFA"}
+						xAxisColor="#505050"
+						color="#0BA5A4"
+						showScrollIndicator={false}
+					/>
+				)}
+				{dataArray.length !== 0 && (
+					<View>
+						<Slider
+							value={1}
+							minimumValue={0.25}
+							maximumValue={4}
+							step={0.5}
+							onValueChange={(num) => setSpacingScale(num)}
 						/>
+						<Text style={[styles.inputText, { flex: 1 }]}>
+							Mean: {mean}
+						</Text>
+						<Text style={[styles.inputText, { flex: 1 }]}>
+							Non 0 Mean: {nzMean}
+						</Text>
 					</View>
 				)}
 				<Button
