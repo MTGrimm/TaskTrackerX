@@ -68,6 +68,9 @@ const Task = ({ navigation, route }: Props) => {
 							{ flexDirection: "row" },
 							{ alignContent: "center" },
 							{ backgroundColor: "#202020" },
+							{ borderRadius: 20 },
+							{ borderBottomLeftRadius: 0 },
+							{ borderBottomRightRadius: 0 },
 						]}
 					>
 						<Text
@@ -87,7 +90,12 @@ const Task = ({ navigation, route }: Props) => {
 							placeholder={timeGoalHour}
 							placeholderTextColor={"#C0C0C0"}
 							onChangeText={setTimeGoalHour}
-							style={[styles.inputBox, { flexGrow: 2 }]}
+							style={[
+								styles.inputBox,
+								{ flexGrow: 2 },
+								{ borderRadius: 0 },
+								{ borderTopRightRadius: 20 },
+							]}
 						/>
 					</View>
 					<View
@@ -95,8 +103,9 @@ const Task = ({ navigation, route }: Props) => {
 							{ flex: 1 },
 							{ flexDirection: "row" },
 							{ alignContent: "center" },
-							{ justifyContent: "center" },
 							{ backgroundColor: "#202020" },
+							{ borderBottomLeftRadius: 20 },
+							{ borderBottomRightRadius: 20 },
 						]}
 					>
 						<Text
@@ -116,7 +125,12 @@ const Task = ({ navigation, route }: Props) => {
 							placeholder={timeGoalMinute}
 							placeholderTextColor={"#C0C0C0"}
 							onChangeText={setTimeGoalMinute}
-							style={[styles.inputBox, { flexGrow: 2 }]}
+							style={[
+								styles.inputBox,
+								{ flexGrow: 2 },
+								{ borderRadius: 0 },
+								{ borderBottomRightRadius: 20 },
+							]}
 						/>
 					</View>
 				</View>
@@ -432,6 +446,8 @@ const Task = ({ navigation, route }: Props) => {
 							activeOpacity={1}
 							style={[
 								styles.trackerTouch,
+								{ borderTopRightRadius: 0 },
+								{ borderBottomRightRadius: 0 },
 								selectedTracker === 1
 									? styles.trackerOverride
 									: null,
@@ -453,6 +469,7 @@ const Task = ({ navigation, route }: Props) => {
 							activeOpacity={1}
 							style={[
 								styles.trackerTouch,
+								{ borderRadius: 0 },
 								selectedTracker === 2
 									? styles.trackerOverride
 									: null,
@@ -474,6 +491,8 @@ const Task = ({ navigation, route }: Props) => {
 							activeOpacity={1}
 							style={[
 								styles.trackerTouch,
+								{ borderTopLeftRadius: 0 },
+								{ borderBottomLeftRadius: 0 },
 								selectedTracker === 3
 									? styles.trackerOverride
 									: null,
@@ -548,6 +567,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: "#303030",
+		borderRadius: 20,
 	},
 
 	trackerText: {
@@ -568,6 +588,8 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		color: "#E0E0E0",
 		width: "100%",
+		borderWidth: 0,
+		borderRadius: 20,
 	},
 
 	inputText: {

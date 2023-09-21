@@ -42,8 +42,10 @@ const CustomButton = ({ name, onPress, backgroundColor, color }: Props) => {
 const styles = StyleSheet.create({
 	buttonContainer: {
 		justifyContent: "center",
+		padding: 2,
 		alignItems: "center",
 		alignSelf: "center",
+		borderRadius: 20,
 	},
 
 	textStyle: {
