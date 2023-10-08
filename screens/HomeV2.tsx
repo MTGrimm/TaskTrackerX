@@ -258,7 +258,12 @@ const HomeV2 = ({ navigation }: { navigation: any }) => {
 										<View
 											style={styles.taskContentContainer}
 										>
-											<Text style={styles.trackerText}>
+											<Text
+												onPress={() =>
+													handleCountInput(task)
+												}
+												style={styles.trackerText}
+											>
 												{trackers[trackerID].count}x
 											</Text>
 											{valueButton(task, trackerID, 1)}

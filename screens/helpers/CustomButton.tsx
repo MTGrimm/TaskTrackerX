@@ -14,9 +14,16 @@ interface Props {
 	onPress: () => void;
 	backgroundColor?: any;
 	color?: any;
+	fontSize?: any;
 }
 
-const CustomButton = ({ name, onPress, backgroundColor, color }: Props) => {
+const CustomButton = ({
+	name,
+	onPress,
+	backgroundColor,
+	color,
+	fontSize,
+}: Props) => {
 	return (
 		<TouchableOpacity
 			style={[
@@ -31,6 +38,7 @@ const CustomButton = ({ name, onPress, backgroundColor, color }: Props) => {
 				style={[
 					styles.textStyle,
 					color === undefined ? null : { color: color },
+					fontSize === undefined ? null : { fontSize: fontSize },
 				]}
 			>
 				{name}
@@ -50,6 +58,7 @@ const styles = StyleSheet.create({
 
 	textStyle: {
 		color: "#793FDF",
+		textAlign: "center",
 		fontSize: 50,
 		marginRight: 10,
 		paddingLeft: 10,

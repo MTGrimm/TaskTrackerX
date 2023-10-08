@@ -44,16 +44,16 @@ const Graph = ({ navigation, route }: Props) => {
 	const [spacing, setSpacing] = useState(0);
 	const [spacingScale, setSpacingScale] = useState(1);
 
-	const dynamicSpacing = () => {
-		if (dataArray.length !== 0) {
-			setSpacing((500 * spacingScale) / dataArray.length);
-		}
-	};
+	// const dynamicSpacing = () => {
+	// 	if (dataArray.length !== 0) {
+	// 		setSpacing((500 * spacingScale) / dataArray.length);
+	// 	}
+	// };
 
-	useEffect(() => {
-		console.log("repeat?");
-		dynamicSpacing();
-	}, [spacingScale]);
+	// useEffect(() => {
+	// 	console.log("repeat?");
+	// 	dynamicSpacing();
+	// }, [spacingScale]);
 
 	const handleMean = () => {
 		let sum = 0;
@@ -112,7 +112,6 @@ const Graph = ({ navigation, route }: Props) => {
 
 					handleMean();
 					handleNzMean();
-					dynamicSpacing();
 					console.log(tempData);
 					setDataArray(tempData);
 				},
@@ -162,6 +161,57 @@ const Graph = ({ navigation, route }: Props) => {
 	};
 
 	const handleDateSelection = () => {
+		if (Platform.OS === "ios") {
+			return (
+				<View style={styles.taskTopBar}>
+					<View>
+						<Text
+							style={[
+								styles.inputText,
+								{ textAlign: "center" },
+								{ backgroundColor: "#252525" },
+							]}
+						>
+							Start Date
+						</Text>
+						<DateTimePicker
+							testID="dateTimePicker"
+							value={startDate}
+							onChange={(event, selectedDate) =>
+								changeDate(event, selectedDate, setStartDate, 1)
+							}
+							style={styles.datePicker}
+						/>
+					</View>
+					<View style={{ marginLeft: 10 }}>
+						<Text
+							style={[
+								styles.inputText,
+								{ textAlign: "center" },
+								{ backgroundColor: "#252525" },
+							]}
+						>
+							End Date
+						</Text>
+						<DateTimePicker
+							testID="dateTimePicker"
+							value={endDate}
+							onChange={(event, selectedDate) =>
+								changeDate(event, selectedDate, setEndDate, 2)
+							}
+							style={styles.datePicker}
+						/>
+					</View>
+					<View style={[{ flex: 1 }]}>
+						<CustomButton
+							name="GRAPH"
+							onPress={() => generateDates()}
+							fontSize={20}
+						/>
+					</View>
+				</View>
+			);
+		}
 		return (
 			<View style={styles.taskTopBar}>
 				<View>
@@ -242,32 +292,36 @@ const Graph = ({ navigation, route }: Props) => {
 			<View style={styles.mainView}>
 				{handleDateSelection()}
 				{dataArray.length !== 0 && (
-					<LineChart
-						data={dataArray}
-						backgroundColor={"#3D246C"}
-						thickness={5}
-						spacing={spacing}
-						yAxisTextStyle={{ color: "#E0E0E0" }}
-						dataPointsColor={"#0BA5A4"}
-						dataPointsWidth={1}
-						textColor1={"yellow"}
-						textColor={"red"}
-						xAxisLabelTextStyle={{ color: "red" }}
-						focusEnabled={true}
-						showTextOnFocus={true}
-						showVerticalLines
-						hideRules
-						textShiftY={-8}
-						textShiftX={-10}
-						textFontSize={13}
-						verticalLinesColor={"#BEADFA"}
-						xAxisColor="#505050"
-						color="#0BA5A4"
-						showScrollIndicator={false}
-					/>
+					<View
+						style={[{ width: "90%" }, { backgroundColor: "#fff" }]}
+					>
+						<LineChart
+							data={dataArray}
+							backgroundColor={"#3D246C"}
+							thickness={5}
+							spacing={50}
+							yAxisTextStyle={{ color: "#E0E0E0" }}
+							dataPointsColor={"#0BA5A4"}
+							dataPointsWidth={1}
+							textColor1={"yellow"}
+							textColor={"red"}
+							xAxisLabelTextStyle={{ color: "red" }}
+							focusEnabled={true}
+							showTextOnFocus={true}
+							showVerticalLines
+							hideRules
+							textShiftY={-8}
+							textShiftX={-10}
+							textFontSize={13}
+							verticalLinesColor={"#BEADFA"}
+							xAxisColor="#505050"
+							color="#0BA5A4"
+							showScrollIndicator={false}
+						/>
+					</View>
 				)}
 				{dataArray.length !== 0 && (
-					<View>
+					<View style={{ flex: 1 }}>
 						<Slider
 							value={1}
 							minimumValue={0.25}
@@ -299,6 +353,11 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: "#141414",
+	},
+
+	datePicker: {
+		alignSelf: "center",
+		backgroundColor: "#793FDF",
 	},
 
 	graphView: {
@@ -356,7 +415,7 @@ const styles = StyleSheet.create({
 	taskTopBar: {
 		width: "100%",
 		flexDirection: "row",
-		justifyContent: "space-between",
+		justifyContent: "flex-start",
 		flex: 1,
 	},
 
