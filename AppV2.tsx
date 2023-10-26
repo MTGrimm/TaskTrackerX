@@ -128,14 +128,18 @@ export default function App() {
 							let lastIndex = 0;
 							let taskLength = tasks.length;
 							for (let i = 0; i < taskLength; i++) {
+								console.log(
+									"this where the error happens prob"
+								);
 								if (tasks[taskLength - 1 - i].is_active) {
+									console.log("right?");
 									lastIndex = taskLength - 1 - i;
 									break;
 								}
 							}
 
 							for (let i = 0; i < lastIndex + 1; i++) {
-								if (tasks[i].is_active) {
+								if (taskLength !== 0 && tasks[i].is_active) {
 									tx.executeSql(
 										"INSERT INTO trackers (date, time, count, task_id) VALUES (?, ?, ?, ?)",
 										[currentDate, 0, 0, tasks[i].id],
@@ -162,6 +166,8 @@ export default function App() {
 											return true;
 										}
 									);
+								} else {
+									setIsLoading(false);
 								}
 							}
 						} else {

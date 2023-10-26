@@ -20,7 +20,7 @@ import {
 } from "../context";
 import CustomButton from "./helpers/CustomButton";
 import { TouchableOpacity } from "react-native-gesture-handler";
-
+1;
 const HomeV2 = ({ navigation }: { navigation: any }) => {
 	const db = useDatabaseContext();
 	const { tasks, setTasks } = useTasksContext();

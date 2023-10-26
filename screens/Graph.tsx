@@ -3,6 +3,7 @@ import {
 	Text,
 	View,
 	TextInput,
+	FlatList,
 	Button,
 	SafeAreaView,
 	Platform,
@@ -19,8 +20,6 @@ import {
 import CustomButton from "./helpers/CustomButton";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { LineChart } from "react-native-gifted-charts";
-import { Slider } from "@react-native-assets/slider";
 
 interface Props {
 	navigation: any;
@@ -28,56 +27,234 @@ interface Props {
 }
 
 const Graph = ({ navigation, route }: Props) => {
+	type itemProps = {
+		count: any;
+		date: string;
+	};
 	const db = useDatabaseContext();
 	const [error, setError] = useState<string | null>(null);
 	const [startDate, setStartDate] = useState(new Date());
 	const [endDate, setEndDate] = useState(new Date());
 	const [showStartDate, setShowStartDate] = useState(false);
 	const [showEndDate, setShowEndDate] = useState(false);
-	const [dataArray, setDataArray] = useState<{ value: number }[]>([]);
+	const [dataArray, setDataArray] = useState<itemProps[]>([]);
 	const [dateArray, setDateArray] = useState<string[]>([]);
 	const [mean, setMean] = useState(0);
 	const [nzMean, setNzMean] = useState(0);
-	const [meanType, setMeanType] = useState(0);
 	const [median, setMedian] = useState(0);
+	const [nzMedian, setNzMedian] = useState(0);
 	const [mode, setMode] = useState(0);
+	const [nzMode, setNzMode] = useState(0);
 	const [spacing, setSpacing] = useState(0);
 	const [spacingScale, setSpacingScale] = useState(1);
 
-	// const dynamicSpacing = () => {
-	// 	if (dataArray.length !== 0) {
-	// 		setSpacing((500 * spacingScale) / dataArray.length);
-	// 	}
-	// };
+	const handleCountMode = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT t.count
+				FROM trackers t
+				WHERE t.task_id = ? AND t.date IN (${dateArray.map(() => "?").join(", ")})
+				GROUP BY t.count
+				ORDER BY COUNT(*) DESC
+				LIMIT 1
+				`,
+				[route.params.task.id, ...dateArray],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
 
-	// useEffect(() => {
-	// 	console.log("repeat?");
-	// 	dynamicSpacing();
-	// }, [spacingScale]);
+	const handleNzCountMode = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT t.count
+				FROM trackers t
+				WHERE t.count != 0 AND t.task_id = ? AND t.date IN (${dateArray
+					.map(() => "?")
+					.join(", ")})
+				GROUP BY t.count
+				ORDER BY COUNT(*) DESC
+				LIMIT 1
+				`,
+				[route.params.task.id, ...dateArray],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+					if (resultSet.rows._array.length !== 0) {
+						setNzMode(resultSet.rows._array[0].count);
+					}
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
 
-	const handleMean = () => {
-		let sum = 0;
-		for (let i = 0; i < dataArray.length; i++) {
-			sum += dataArray[i].value;
-		}
-		setMean(sum / dataArray.length);
+	const handleCountMedian = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT t.count
+				FROM trackers t
+				WHERE t.task_id = ? AND t.date IN (${dateArray.map(() => "?").join(", ")})
+				ORDER BY t.count desc
+				LIMIT 1
+				OFFSET (
+					SELECT COUNT(*)/2
+					FROM trackers t2
+					WHERE t2.task_id = ? AND t2.date IN (${dateArray.map(() => "?").join(", ")})
+				)
+				`,
+				[
+					route.params.task.id,
+					...dateArray,
+					route.params.task.id,
+					...dateArray,
+				],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
+
+	const handleNzCountMedian = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT t.count
+				FROM trackers t
+				WHERE t.count != 0 AND t.task_id = ? AND t.date IN (${dateArray
+					.map(() => "?")
+					.join(", ")})
+				ORDER BY t.count desc
+				LIMIT 1
+				OFFSET (
+					SELECT COUNT(*)/2
+					FROM trackers t2
+					WHERE t2.count != 0 AND t2.task_id = ? AND t2.date IN (${dateArray
+						.map(() => "?")
+						.join(", ")})
+				)
+				`,
+				[
+					route.params.task.id,
+					...dateArray,
+					route.params.task.id,
+					...dateArray,
+				],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+					if (resultSet.rows._array.length !== 0) {
+						setNzMedian(resultSet.rows._array[0].count);
+					}
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
+
+	const handleTimeMean = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT t.time
+				from trackers t
+				WHERE t.task_id = ? AND t.date IN (${dateArray.map(() => "?").join(", ")})
+				`,
+				[route.params.task.id, ...dateArray],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
+
+	const handleNzTimeMean = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT t.time
+				from trackers t
+				WHERE t.time != 0 AND t.task_id = ? AND t.date IN (${dateArray
+					.map(() => "?")
+					.join(", ")})
+				`,
+				[route.params.task.id, ...dateArray],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
+	};
+
+	const handleCountMean = () => {
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT AVG(t.count)
+				FROM trackers t
+				WHERE t.task_id = ? AND t.date IN (${dateArray.map(() => "?").join(", ")})
+				`,
+				[route.params.task.id, ...dateArray],
+				(txobj, resultSet) => {
+					console.log(resultSet.rows._array);
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
 	};
 
 	const handleNzMean = () => {
-		let nzSum = 0;
-		let nzLength = 0;
-		for (let i = 0; i < dataArray.length; i++) {
-			if (dataArray[i].value !== 0) {
-				nzSum += dataArray[i].value;
-				nzLength++;
-			}
-		}
-		setNzMean(nzSum / nzLength);
+		db.transaction((tx) => {
+			tx.executeSql(
+				`
+				SELECT AVG(t.count)
+				FROM trackers t
+				WHERE t.count != 0 AND t.task_id = ? AND t.date IN (${dateArray
+					.map(() => "?")
+					.join(", ")})
+				`,
+				[route.params.task.id, ...dateArray],
+				(txObj, resultSet) => {
+					console.log(resultSet.rows._array);
+				},
+				(txObj, error) => {
+					console.log(error);
+					return false;
+				}
+			);
+		});
 	};
 
 	useEffect(() => {
-		//for (let i = 0; i < dateArray.length; i++) {
-		console.log("?");
 		db.transaction((tx) => {
 			tx.executeSql(
 				`
@@ -97,22 +274,25 @@ const Graph = ({ navigation, route }: Props) => {
 							dateArray[i] !== tempResults[resultIndex].date
 						) {
 							tempData.push({
-								value: 0,
-								dataPointText: dateArray[i],
+								count: 0,
+								date: dateArray[i],
 							});
 						} else {
 							tempData.push({
-								value: tempResults[resultIndex].count,
-								dataPointText: dateArray[i],
+								count: tempResults[resultIndex].count,
+								date: dateArray[i],
 							});
 							resultIndex++;
 						}
 						console.log(resultIndex);
 					}
 
-					handleMean();
+					handleCountMean();
 					handleNzMean();
-					console.log(tempData);
+					handleCountMedian();
+					handleNzCountMedian();
+					handleCountMode();
+					handleNzCountMode();
 					setDataArray(tempData);
 				},
 				(txObj, error) => {
@@ -250,7 +430,67 @@ const Graph = ({ navigation, route }: Props) => {
 						{getFormattedDate(endDate)}
 					</Text>
 				</View>
+				<CustomButton
+					name="GRAPH"
+					onPress={() => generateDates()}
+					fontSize={20}
+				/>
 			</View>
+		);
+	};
+
+	const Item = ({ count, date }: itemProps) => {
+		return (
+			<View style={styles.itemView}>
+				<View style={styles.tableTextView}>
+					<Text style={styles.tableText}>{date}</Text>
+				</View>
+				<View style={styles.tableTextView}>
+					<Text style={styles.tableText}>{count}</Text>
+				</View>
+			</View>
+		);
+	};
+
+	const itemSeperator = () => {
+		return (
+			<View
+				style={[
+					{ height: 1 },
+					{ width: "100%" },
+					{ backgroundColor: "#CCC" },
+				]}
+			/>
+		);
+	};
+
+	const listHeader = () => {
+		return (
+			<View style={styles.headerView}>
+				<View style={styles.tableHeaderView}>
+					<Text style={styles.tableText}>{"Date"}</Text>
+				</View>
+				<View style={styles.tableHeaderView}>
+					<Text style={styles.tableText}>{"Count"}</Text>
+				</View>
+			</View>
+		);
+	};
+
+	const generateTable = () => {
+		return (
+			<SafeAreaView style={styles.table}>
+				<FlatList
+					ListHeaderComponent={listHeader}
+					stickyHeaderIndices={[0]}
+					data={dataArray}
+					renderItem={({ item }) => (
+						<Item count={item.count} date={item.date} />
+					)}
+					keyExtractor={(item) => item.date}
+					ItemSeparatorComponent={itemSeperator}
+				/>
+			</SafeAreaView>
 		);
 	};
 
@@ -294,53 +534,65 @@ const Graph = ({ navigation, route }: Props) => {
 				{dataArray.length !== 0 && (
 					<View
 						style={[{ width: "90%" }, { backgroundColor: "#fff" }]}
-					>
-						<LineChart
-							data={dataArray}
-							backgroundColor={"#3D246C"}
-							thickness={5}
-							spacing={50}
-							yAxisTextStyle={{ color: "#E0E0E0" }}
-							dataPointsColor={"#0BA5A4"}
-							dataPointsWidth={1}
-							textColor1={"yellow"}
-							textColor={"red"}
-							xAxisLabelTextStyle={{ color: "red" }}
-							focusEnabled={true}
-							showTextOnFocus={true}
-							showVerticalLines
-							hideRules
-							textShiftY={-8}
-							textShiftX={-10}
-							textFontSize={13}
-							verticalLinesColor={"#BEADFA"}
-							xAxisColor="#505050"
-							color="#0BA5A4"
-							showScrollIndicator={false}
-						/>
-					</View>
+					></View>
 				)}
 				{dataArray.length !== 0 && (
-					<View style={{ flex: 1 }}>
-						<Slider
-							value={1}
-							minimumValue={0.25}
-							maximumValue={4}
-							step={0.5}
-							onValueChange={(num) => setSpacingScale(num)}
-						/>
-						<Text style={[styles.inputText, { flex: 1 }]}>
-							Mean: {mean}
-						</Text>
-						<Text style={[styles.inputText, { flex: 1 }]}>
-							Non 0 Mean: {nzMean}
-						</Text>
+					<View style={[{ flex: 5 }, { width: "100%" }]}>
+						<View style={styles.tableView}>{generateTable()}</View>
+						<View style={styles.statView}>
+							<View style={styles.statContainer}>
+								<View style={styles.statTextView}>
+									<Text
+										style={[styles.statText, { flex: 1 }]}
+									>
+										Mean: {mean}
+									</Text>
+								</View>
+								<View style={styles.statTextView}>
+									<Text
+										style={[styles.statText, { flex: 1 }]}
+									>
+										Non 0 Mean: {nzMean}
+									</Text>
+								</View>
+							</View>
+							<View style={styles.statContainer}>
+								<View style={styles.statTextView}>
+									<Text
+										style={[styles.statText, { flex: 1 }]}
+									>
+										Median: {median}
+									</Text>
+								</View>
+
+								<View style={styles.statTextView}>
+									<Text
+										style={[styles.statText, { flex: 1 }]}
+									>
+										Non 0 Median: {nzMedian}
+									</Text>
+								</View>
+							</View>
+							<View style={styles.statContainer}>
+								<View style={styles.statTextView}>
+									<Text
+										style={[styles.statText, { flex: 1 }]}
+									>
+										Mode: {mode}
+									</Text>
+								</View>
+
+								<View style={styles.statTextView}>
+									<Text
+										style={[styles.statText, { flex: 1 }]}
+									>
+										Non 0 Mode: {nzMode}
+									</Text>
+								</View>
+							</View>
+						</View>
 					</View>
 				)}
-				<Button
-					title="generate dates"
-					onPress={() => generateDates()}
-				/>
 			</View>
 		</View>
 	);
@@ -353,6 +605,84 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: "#141414",
+	},
+
+	statView: {
+		flex: 1,
+		backgroundColor: "#501caa",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+
+	statContainer: {
+		flex: 1,
+		flexDirection: "row",
+		backgroundColor: "#8f5fe4",
+		justifyContent: "center",
+		alignItems: "center",
+		margin: 5,
+		borderRadius: 0,
+	},
+
+	statTextView: {
+		flex: 1,
+		justifyContent: "center",
+	},
+
+	statText: {
+		flex: 1,
+		fontSize: 20,
+		paddingLeft: 10,
+		textAlignVertical: "center",
+	},
+
+	headerView: {
+		flex: 1,
+		flexDirection: "row",
+		borderWidth: 1,
+	},
+
+	itemView: {
+		backgroundColor: "#8f5fe4",
+		flex: 1,
+		flexDirection: "row",
+		margin: 2,
+		borderRadius: 7,
+		borderWidth: 1.5,
+	},
+
+	tableView: {
+		flex: 2,
+		borderRadius: 10,
+		width: "100%",
+	},
+
+	table: {
+		backgroundColor: "#5E22C9",
+		flex: 1,
+	},
+
+	tableTextView: {
+		padding: 5,
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+
+	tableHeaderView: {
+		backgroundColor: "#793FDF",
+		padding: 5,
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+
+	tableText: {
+		color: "white",
+		flex: 1,
+		textAlign: "center",
+		textAlignVertical: "center",
+		fontSize: 18,
 	},
 
 	datePicker: {
