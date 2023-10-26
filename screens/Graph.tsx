@@ -216,13 +216,18 @@ const Graph = ({ navigation, route }: Props) => {
 		db.transaction((tx) => {
 			tx.executeSql(
 				`
-				SELECT AVG(t.count)
+				SELECT AVG(t.count) AS avg, COUNT(*) AS count
 				FROM trackers t
 				WHERE t.task_id = ? AND t.date IN (${dateArray.map(() => "?").join(", ")})
 				`,
 				[route.params.task.id, ...dateArray],
 				(txobj, resultSet) => {
 					console.log(resultSet.rows._array);
+					const includedDates = resultSet.rows._array[0].count;
+					let adjustedMean = resultSet.rows._array[0].avg;
+					adjustedMean = adjustedMean * includedDates;
+					adjustedMean = adjustedMean / dateArray.length;
+					setMean(adjustedMean.toFixed(4));
 				},
 				(txObj, error) => {
 					console.log(error);
@@ -236,7 +241,7 @@ const Graph = ({ navigation, route }: Props) => {
 		db.transaction((tx) => {
 			tx.executeSql(
 				`
-				SELECT AVG(t.count)
+				SELECT AVG(t.count) AS avg
 				FROM trackers t
 				WHERE t.count != 0 AND t.task_id = ? AND t.date IN (${dateArray
 					.map(() => "?")
@@ -245,6 +250,9 @@ const Graph = ({ navigation, route }: Props) => {
 				[route.params.task.id, ...dateArray],
 				(txObj, resultSet) => {
 					console.log(resultSet.rows._array);
+					if (resultSet.rows._array.length !== 0) {
+						setNzMean(resultSet.rows._array[0].avg);
+					}
 				},
 				(txObj, error) => {
 					console.log(error);
